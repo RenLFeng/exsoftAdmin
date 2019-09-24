@@ -35,6 +35,24 @@ const myRouter=new Router({
         meta:{title:'所有用户'}
       },
       {
+        path:'/allBanke',
+        component: getComponent('bankes','index'),
+        name:'bankes',
+        meta:{title:'班课管理'}
+      },
+
+
+
+
+
+
+
+
+
+
+
+      
+      {
         path:'/icon',
         component: getComponent('icons','index'),
         name:'icon',

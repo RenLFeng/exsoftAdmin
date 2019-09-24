@@ -14,22 +14,23 @@ module.exports = {
         .set('@',resolve('src'))
     },
     devServer: {
-        open:true
+        open:true,
         // 设置代理
         // lintOnSave: true,
         // devServer: {
         //     proxy: {
         //         // proxy all requests starting with /api to jsonplaceholder
         //         '/api': {
-        //             target: 'http://test.jubao56.com/', //代理接口
+        //             target: 'http://192.168.0.2:81', //代理接口
         //             changeOrigin: true,
         //             pathRewrite: {
         //                 '^/api': '' //代理的路径
         //             }
         //         }
         //     }
-        // }
+        // },
         // proxy: 'http://test.jubao56.com/'
+        proxy: 'http://192.168/.0.2:81'
     },
     //定义scss全局变量
     css: {

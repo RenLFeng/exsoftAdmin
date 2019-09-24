@@ -15,7 +15,8 @@ allUsers
     return {
     }
   },
-
+created(){
+},
   methods: {}
 }
 </script>

@@ -1,0 +1,24 @@
+.el-form-item__label {
+    color: #606266 !important;
+  }
+  .wrapper .main-container {
+    padding-left: 15px;
+  }
+  .search-content {
+    margin: 20px 0;
+    text-align: left;
+  }
+  .search-content .filter-item {
+    margin-right: 5px;
+  }
+  .tags{
+    padding:5px 0 !important;
+  }
+  .tags-li.active {
+    border: 1px solid #42b983 !important;
+    background-color: #42b983 !important;
+  }
+  .tags-close-box{
+        top: 50%!important;
+      transform: translate(0, -50%)!important;
+  }

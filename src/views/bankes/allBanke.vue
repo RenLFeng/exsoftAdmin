@@ -53,7 +53,7 @@
       <el-table-column v-for="(v,i) in allUserTableList" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <!-- <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button> -->
+          <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button>
           <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
@@ -123,22 +123,7 @@ const allUserData = [
     avatar: "/student.png",
     detail: null,
     sex: 0
-  },
-  {
-    id: 1000,
-    role: 5,
-    account: "student3",
-    name: "student3",
-    password: "student3",
-    salt: "",
-    states: 1,
-    activetime: "0000-00-00 00:00:00",
-    createtime: "0000-00-00 00:00:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0
-  },
-
+  }
 ];
 export default {
   name: "",
