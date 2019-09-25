@@ -50,7 +50,18 @@
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
     </div>
     <el-table :data="allUserData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in allUserTableList" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column v-for="(v,i) in allUserTableList.slice(0,3)" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column prop="avatar" label="头像">
+        <template slot-scope="scope">
+          <img :src="scope.row.avatar" alt>
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-for="v in allUserTableList.slice(3)"
+        :prop="v.prop"
+        :label="v.title"
+        :key="v.prop"
+      ></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <!-- <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button> -->
@@ -94,7 +105,7 @@
 </template>
 
 <script>
-import { allUserTableTitle, roleType } from '../common/index';
+import { userTableHead, roleType } from "@/common.js";
 const allUserData = [
   {
     id: 1005,
@@ -137,8 +148,7 @@ const allUserData = [
     avatar: "/student.png",
     detail: null,
     sex: 0
-  },
-
+  }
 ];
 export default {
   name: "",
@@ -174,23 +184,38 @@ export default {
   },
   created() {
     this.getAllUser();
-    this.allUserTableList = allUserTableTitle;
+    this.allUserTableList = userTableHead;
   },
   computed: {
     openFormStateText() {
-      return this.openForm ? "编辑" : "新增";
+      return this.openForm ? "编辑用户" : "新增用户";
     }
   },
   methods: {
     //获取所有用户数据
-    getAllUser() {
+       getAllUser() {
       this.$http
         .post("/api/admin/userquery", {})
         .then(res => {
-          console.log(res);
+          if (res.data.code == 0) {
+            console.log(res);
+            this.$message({
+              type: "success",
+              message: "获取用户数据成功"
+            });
+          } else {
+              this.$message({
+              type: "info",
+              message: "获取用户数据失败"
+            });
+          }
         })
-        .catch(() => {
+        .catch(res => {
           console.log("res");
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
         });
     },
     //搜索

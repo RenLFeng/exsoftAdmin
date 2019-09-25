@@ -3,18 +3,18 @@ function resolve(dir){
     return path.join(__dirname,dir)
 }
 module.exports = {
-    chainWebpack: config => {
-        //这里是对环境的配置，不同的环境对应不同的BASE_URL
-        config.plugin('define').tap(args => {
-            args[0]['process.env'].BASE_URL = JSON.stringify(process.env.BASE_URL)
-            return args;
-        });
-        //设置别名
-        config.resolve.alias
-        .set('@',resolve('src'))
-    },
+    // chainWebpack: config => {
+    //     //这里是对环境的配置，不同的环境对应不同的BASE_URL
+    //     config.plugin('define').tap(args => {
+    //         args[0]['process.env'].BASE_URL = JSON.stringify(process.env.BASE_URL)
+    //         return args;
+    //     });
+    //     //设置别名
+    //     config.resolve.alias
+    //     .set('@',resolve('src'))
+    // },
     devServer: {
-        open:true,
+        // open:true,
         // 设置代理
         // lintOnSave: true,
         // devServer: {
@@ -30,7 +30,7 @@ module.exports = {
         //     }
         // },
         // proxy: 'http://test.jubao56.com/'
-        proxy: 'http://192.168/.0.2:81'
+        proxy: 'http://192.168.0.2:81'
     },
     //定义scss全局变量
     css: {

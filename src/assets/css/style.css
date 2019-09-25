@@ -8,8 +8,9 @@
     margin: 20px 0;
     text-align: left;
   }
-  .search-content .filter-item {
+  .filter-item{
     margin-right: 5px;
+    margin-bottom: 5px;
   }
   .tags{
     padding:5px 0 !important;
@@ -22,3 +23,9 @@
         top: 50%!important;
       transform: translate(0, -50%)!important;
   }
+  .el-dialog__header{
+    text-align: left;
+  }
+  .el-button--small,.el-button + .el-button{
+    margin: 2px;
+}

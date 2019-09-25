@@ -1,7 +1,7 @@
 <template>
   <div class="head-container clearfix">
     <div class="header-left">
-      <showAside :toggle-click="toggleClick"/>
+      <showAside :toggle-click="toggleClick" />
     </div>
     <div class="header-right">
       <div class="header-user-con">
@@ -15,8 +15,8 @@
         <div class="btn-bell">
           <el-tooltip effect="dark" :content="message?`有${message}条未读消息`:`消息中心`" placement="bottom">
             <router-link to="/tabs">
-             <i class="el-icon-bell"></i>
-             </router-link>
+              <i class="el-icon-bell"></i>
+            </router-link>
           </el-tooltip>
           <span class="btn-bell-badge" v-if="message"></span>
         </div>
@@ -24,10 +24,11 @@
         <el-dropdown class="avatar-container" trigger="click">
           <div class="avatar-wrapper">
             <img
-              src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3266090804,66355162&fm=26&gp=0.jpg"
+              :src="loginUser.avatar"
               class="user-avatar"
-            >
-            {{username }}<i class="el-icon-caret-bottom"/>
+            />
+            {{loginUser.account}}
+            <i class="el-icon-caret-bottom" />
           </div>
           <el-dropdown-menu slot="dropdown" class="user-dropdown">
             <router-link class="inlineBlock" to="/">
@@ -44,7 +45,9 @@
   </div>
 </template>
 <script>
+import cookie from 'js-cookie'
 import showAside from "@/components/showAside.vue";
+import { mapState } from "vuex";
 export default {
   // name:'header',
   components: {
@@ -67,15 +70,21 @@ export default {
         console.log(newValue);
         this.$store.commit("IS_COLLAPSE", newValue);
       }
-    }
+    },
+      ...mapState(["loginUser"]),
   },
   methods: {
     toggleClick() {
       this.isCollapse = !this.isCollapse;
     },
     // 用户名下拉菜单选择事件
-    logout(command) {
-      this.$router.push("/login");
+    logout() {
+      this.$http.post("/api/api/logout").then(() => {
+        //! 清空本地账户信息
+        this.$store.commit("SETLOGINUSER", {});
+        this.$store.commit("COMMIT_TOKEN", null);
+        this.$router.push("/login");
+      });
     },
     // 全屏事件
     handleFullScreen() {
@@ -105,7 +114,7 @@ export default {
       this.fullscreen = !this.fullscreen;
     }
   }
-}; 
+};
 </script>
 <style lang="scss" scoped>
 .head-container {
@@ -143,7 +152,7 @@ export default {
   cursor: pointer;
   margin-bottom: 10px;
 }
-.btn-bell{
+.btn-bell {
   position: relative;
   width: 30px;
   height: 30px;

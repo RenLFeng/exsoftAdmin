@@ -1,8 +1,8 @@
 <template>
   <div class="login-container">
     <div class="login-form">
-    <el-row :gutter="20">
-      <el-col :lg="6" :sm="10" class="aa">
+      <el-row :gutter="20">
+        <el-col :lg="6" :sm="10" class="aa">
           <h3>后台管理系统</h3>
           <el-form
             :model="ruleForm2"
@@ -19,17 +19,16 @@
               <el-input type="password" v-model="ruleForm2.password" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
+              <el-button type="primary" @click="submitForm('ruleForm2')">登录</el-button>
               <el-button @click="resetForm('ruleForm2')">重置</el-button>
             </el-form-item>
           </el-form>
-      </el-col>
-    </el-row>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
 <script>
-// import { login } from "@/api/api.js";
 import { messages } from "@/assets/js/common.js";
 export default {
   name: "login",
@@ -53,8 +52,8 @@ export default {
     };
     return {
       ruleForm2: {
-        password: "admin",
-        username: "admin"
+        password: "",
+        username: ""
       },
       rules2: {
         password: [{ validator: validatePass, trigger: "blur" }],
@@ -62,25 +61,27 @@ export default {
       }
     };
   },
+  computed: {},
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          this.$router.push({
+          this.$http
+            .post("/api/api/login", {
+              account: this.ruleForm2.username,
+              password: this.ruleForm2.password
+            })
+            .then(res => {
+              console.log("成功", res);
+              this.$store.commit("SETLOGINUSER", res.data.data);
+              this.$store.commit("COMMIT_TOKEN", res.data.data.id);
+              this.$router.push({
                 path: "/"
               });
-          // login(this.ruleForm2)
-          //   .then(res => {
-          //     //提交数据到vuex
-          //     this.$store.commit("COMMIT_TOKEN", res);
-          //     this.$message('success',res.message)
-          //     this.$router.push({
-          //       path: "/"
-          //     });
-          //   })
-          //   .catch(err => {
-          //     this.$message("error", err.message);
-          //   });
+            })
+            .catch(res => {
+              console.log("失败", res);
+            });
         } else {
           return false;
         }
@@ -105,13 +106,13 @@ export default {
     text-align: center;
     color: white;
     font-size: 18px;
-    .aa{
+    .aa {
       margin: auto;
       float: none;
     }
-    h3{
+    h3 {
       line-height: 60px;
-      margin-left: 100px
+      margin-left: 100px;
     }
   }
 }

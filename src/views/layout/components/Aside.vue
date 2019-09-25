@@ -9,6 +9,7 @@
       text-color="#bfcbd9"
       :collapse="isCollapse"
       active-text-color="#409EFF"
+      :unique-opened="true"
       router
     >
       <template v-for="item in items">
@@ -76,12 +77,16 @@ export default {
         },
           {
           icon: "el-icon-edit-outline",
-          index: "zhouye",
+          index: "zuoye",
           title: "作业管理" ,
           subs: [
             {
-              index: "allZhouye",
+              index: "allZuoye",
               title: "所有作业"
+            },
+             {
+              index: "allsubmit",
+              title: "学生提交"
             },
           ]
         },
@@ -222,6 +227,9 @@ export default {
   }
   .el-menu--collapse {
     height: 100%;
+  }
+  .el-menu-item.is-active{
+    // background-color: rgb(0, 0, 0)!important;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="allBanke-container">
+  <div class="alluser-container">
     <div class="search-content filter-container">
       <el-input
         v-model="listQuery.account"
@@ -38,7 +38,7 @@
         class="filter-item"
         type="primary"
         icon="el-icon-download"
-        @click="ExportExcel"
+        @click="handleDownload"
       >导出</el-button>
       <el-button
         :loading="downloadLoading"
@@ -47,33 +47,42 @@
         icon="el-icon-download"
         @click="handleExport"
       >导入</el-button>
-      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(banKe,0)">新增</el-button>
+      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
     </div>
     <el-table :data="allUserData" border style="width: 100%" size="small">
       <el-table-column v-for="(v,i) in allUserTableList" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
-      <el-table-column label="操作" fixed="right">
+      <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="primary" @click="handleClickUpdateData(scope.row)" size="small">查看</el-button>
+          <!-- <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button> -->
           <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- /// -->
-    <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible" class="creater-form">
+    <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible">
       <el-form
         :rules="rules"
         ref="dataForm"
-        :model="banKe"
+        :model="temp"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="任课教师账户:" prop="account">
-          <el-input v-model="banKe.teacher" placeholder="请输入账户名"></el-input>
+        <el-form-item label="账户名:" prop="account">
+          <el-input v-model="temp.account" placeholder="请输入账户名"></el-input>
         </el-form-item>
-        <el-form-item label="班课名:" prop="teacher">
-          <el-input v-model="banKe.account" placeholder="班课名"></el-input>
+        <el-form-item label="姓名:" prop="name">
+          <el-input v-model="temp.name" placeholder="请输入姓名"></el-input>
+        </el-form-item>
+        <el-form-item label="角色:" prop="role">
+          <el-select v-model="temp.role" placeholder="请选择">
+            <el-option v-for="v in roleType" :key="v.role" :label="v.label" :value="v.role"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="密码:" prop="password">
+          <el-input placeholder="请输入密码" v-model="temp.password" show-password></el-input>
+          <!-- <el-date-picker v-model="temp.password" type="datetime" placeholder="Please pick a date" /> -->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -85,8 +94,7 @@
 </template>
 
 <script>
-import { bankeTableHead, roleType } from "@/common.js";
-import createrUser from "./create";
+import { bankeTableHead, roleType } from '@/common.js';
 const allUserData = [
   {
     id: 1005,
@@ -101,8 +109,8 @@ const allUserData = [
     avatar: "/student.png",
     detail: null,
     sex: 0,
-    nb: 3,
-    teacher: "teacher1"
+    nb:3,
+    teacher:'teacher1'
   },
   {
     id: 1006,
@@ -117,15 +125,28 @@ const allUserData = [
     avatar: "/student.png",
     detail: null,
     sex: 0,
-    nb: 3,
-    teacher: "teacher1"
+      nb:3,
+    teacher:'teacher1'
+  },
+  {
+    id: 10046,
+    role: 3,
+    account: "sds",
+    name: "studencccct1",
+    password: "studencxzct1",
+    salt: "",
+    states: 1,
+    activetime: "2019-07-05 10:20:00",
+    createtime: "2019-02-02 10:40:00",
+    avatar: "/student.png",
+    detail: null,
+    sex: 0,
+      nb:3,
+    teacher:'teacher1'
   }
 ];
 export default {
   name: "",
-  components: {
-    createrUser
-  },
   data() {
     return {
       listQuery: {
@@ -138,20 +159,22 @@ export default {
       allUserData: allUserData,
       downloadLoading: false,
       dialogFormVisible: false,
-      banKe: {
+      temp: {
+        role: "",
         account: "",
-        teacher: ""
+        name: "",
+        password: ""
       },
       roleType: roleType,
       openForm: 0,
       rules: {
         account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
-        teacher: [{ required: true, message: "请输入班课名", trigger: "blur" }]
-      },
-      listLoading: true,
-      downloadLoading: false,
-      filename: "测试文件",
-      autoWidth: true
+        name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
+        role: [
+          { required: true, message: "请至少选择一个角色", trigger: "blur" }
+        ],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+      }
     };
   },
   created() {
@@ -160,69 +183,19 @@ export default {
   },
   computed: {
     openFormStateText() {
-      return this.openForm ? "编辑班课" : "新增班课";
+      return this.openForm ? "编辑用户" : "新增用户";
     }
   },
   methods: {
-    ExportExcel() {
-      console.log("导出数据");
-      let th = [];
-      for (let v of this.allUserTableList) {
-        th.push(v.tiitle);
-      }
-      import("@/vendor/Export2Excel").then(excel => {
-        //表格的表头列表
-        const tHeader = th;
-        //与表头相对应的数据里边的字段
-        const filterVal = ["id", "account", "nb", "teacher", "activetime"];
-        const list = this.allUserData;
-        const data = this.formatJson(filterVal, list);
-        //这里还是使用export_json_to_excel方法比较好，方便操作数据
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: this.filename,
-          autoWidth: this.autoWidth
-        });
-        this.downloadLoading = false;
-      });
-    },
-    //洗数据
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v =>
-        filterVal.map(j => {
-          // if (j === "timestamp") {
-          // return parseTime(v[j]);
-          // } else {
-          return v[j];
-          // }
-        })
-      );
-    },
     //获取所有用户数据
     getAllUser() {
       this.$http
-        .post("/api/admin/userquery", {})
+        .post("/api/api/bankequery", {})
         .then(res => {
-          if (res.data.code == 0) {
-            console.log(res);
-            this.$message({
-              type: "success",
-              message: "加载成功"
-            });
-          } else {
-              this.$message({
-              type: "info",
-              message: "加载失败"
-            });
-          }
+          console.log(res);
         })
-        .catch(res => {
+        .catch(() => {
           console.log("res");
-          this.$message({
-            type: "error",
-            message: res.data.msg
-          });
         });
     },
     //搜索
@@ -242,7 +215,7 @@ export default {
           password: ""
         };
       }
-      this.banKe = row;
+      this.temp = row;
       this.dialogFormVisible = true;
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
@@ -294,7 +267,7 @@ export default {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
           this.$http
-            .post("/api/admin/useradd", this.banKe)
+            .post("/api/admin/useradd", this.temp)
             .then(res => {
               if (res.data.code == 0) {
                 console.log(res);
@@ -321,7 +294,7 @@ export default {
       });
     },
     init() {
-      this.banKe = {
+      this.temp = {
         role: "",
         account: "",
         name: "",
@@ -333,15 +306,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.allBanke-container {
-}
-</style>
-<style>
-.allBanke-container .creater-form .el-form-item__label {
-  width: 115px !important;
-  text-align: right;
-}
-.allBanke-container .creater-form .el-form-item__content {
-  margin-left: 115px !important;
+.alluser-container {
+  .el-select {
+    width: 100%;
+  }
 }
 </style>

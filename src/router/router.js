@@ -37,9 +37,34 @@ const myRouter=new Router({
       {
         path:'/allBanke',
         component: getComponent('bankes','index'),
-        name:'bankes',
+        name:'allBanke',
         meta:{title:'班课管理'}
       },
+      {
+        path:'/allZuoye',
+        component: getComponent('zuoye','index'),
+        name:'allZuoye',
+        meta:{title:'作业管理'}
+      },
+      {
+        path:'/allsubmit',
+        component: getComponent('zuoye','allSubmit'),
+        name:'allsubmit',
+        meta:{title:'学生提交'}
+      },
+      {
+        path:'/allComment',
+        component: getComponent('comment','allComment'),
+        name:'allComment',
+        meta:{title:'所有评论'}
+      },
+      {
+        path:'/allAnswer',
+        component: getComponent('comment','allAnswer'),
+        name:'allAnswer',
+        meta:{title:'所有回复'}
+      },
+
 
 
 
@@ -110,16 +135,16 @@ const myRouter=new Router({
     }
   ]
 })
-//判断是否存在token
 myRouter.beforeEach((to,from,next)=>{
-  NProgress.start()
-  if (to.path !== '/login' && !store.state.token) {
-    //  next('/login')
-     NProgress.done() // 结束Progress
+  NProgress.start();
+  if (to.path !='/login' && !store.state.token) {
+     next('/login')
+     NProgress.done()
+  }else{
+    next()
   }
-  next()
 })
 myRouter.afterEach(() => {
-  NProgress.done() // 结束Progress
+  NProgress.done() 
 })
 export default myRouter

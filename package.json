@@ -13,6 +13,7 @@
     "element-ui": "^2.4.5",
     "elementui_treegrid": "^0.0.3",
     "file-saver": "^2.0.1",
+    "js-cookie": "^2.2.1",
     "jszip": "^3.2.2",
     "nprogress": "^0.2.0",
     "vue": "^2.6.6",
