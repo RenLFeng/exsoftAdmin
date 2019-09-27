@@ -1,145 +1,24 @@
 <template>
   <div class="alluser-container">
     <div class="search-content filter-container">
-      <el-input
-        v-model="listQuery.account"
-        placeholder="账户名"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-input
-        v-model="listQuery.name"
-        placeholder="姓名"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-input
-        v-model="listQuery.role"
-        placeholder="角色类型"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-select
-        v-model="listQuery.sort"
-        placeholder="排序"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      >
-        <el-option label="升序" value="1" />
-        <el-option label="降序" value="0" />
-      </el-select>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleDownload"
-      >导出</el-button>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleExport"
-      >导入</el-button>
-      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
+      <el-button class="filter-item" @click="back()">返回</el-button>
     </div>
-    <el-table :data="allUserData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in allUserTableList" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+    <el-table :data="listData" border style="width: 100%" size="small">
+      <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <!-- <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button> -->
-          <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- /// -->
-    <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible">
-      <el-form
-        :rules="rules"
-        ref="dataForm"
-        :model="temp"
-        label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left:50px;"
-      >
-        <el-form-item label="账户名:" prop="account">
-          <el-input v-model="temp.account" placeholder="请输入账户名"></el-input>
-        </el-form-item>
-        <el-form-item label="姓名:" prop="name">
-          <el-input v-model="temp.name" placeholder="请输入姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="角色:" prop="role">
-          <el-select v-model="temp.role" placeholder="请选择">
-            <el-option v-for="v in roleType" :key="v.role" :label="v.label" :value="v.role"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="密码:" prop="password">
-          <el-input placeholder="请输入密码" v-model="temp.password" show-password></el-input>
-          <!-- <el-date-picker v-model="temp.password" type="datetime" placeholder="Please pick a date" /> -->
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="createData()">确定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { zuoyeSubmitTableHead, roleType } from '@/common.js';
-const allUserData = [
-  {
-    id: 1005,
-    studentaccount: '减肥a',
-    studentname: "张三",
-    filetext: "理发师麻烦了",
-    file: "submit.txt",
-    mark: "100",
-    commentnumber: '20',
-    submithistorynumber: "5",
-  },
-    {
-    id: 1005,
-    studentaccount: '方官',
-    studentname: "张三g",
-    filetext: "f韩国过分",
-    file: "submit.txt",
-    mark: "100",
-    commentnumber: '20',
-    submithistorynumber: "5",
-  },
-   {
-    id: 1005,
-    studentaccount: '更多',
-    studentname: "丽水",
-    filetext: "个地方官",
-    file: "submit.txt",
-    mark: "100",
-    commentnumber: '20',
-    submithistorynumber: "5",
-  },
-   {
-    id: 1005,
-    studentaccount: '方法',
-    studentname: "张三",
-    filetext: "理发师麻烦了",
-    file: "submit.txt",
-    mark: "100",
-    commentnumber: '20',
-    submithistorynumber: "5",
-  },
-
-];
+import { zuoyeSubmitTableHead, roleType } from "@/common.js";
 export default {
   name: "",
+  props: ["id"],
   data() {
     return {
       listQuery: {
@@ -148,8 +27,8 @@ export default {
         name: "",
         sort: "1"
       },
-      allUserTableList: [],
-      allUserData: allUserData,
+      tHead: [],
+      listData: [],
       downloadLoading: false,
       dialogFormVisible: false,
       temp: {
@@ -159,20 +38,12 @@ export default {
         password: ""
       },
       roleType: roleType,
-      openForm: 0,
-      rules: {
-        account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
-        name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        role: [
-          { required: true, message: "请至少选择一个角色", trigger: "blur" }
-        ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
-      }
+      openForm: 0
     };
   },
   created() {
     this.getAllUser();
-    this.allUserTableList = zuoyeSubmitTableHead;
+    this.tHead = zuoyeSubmitTableHead;
   },
   computed: {
     openFormStateText() {
@@ -183,40 +54,32 @@ export default {
     //获取所有用户数据
     getAllUser() {
       this.$http
-        .post("/api/api/bankequery", {})
-        .then(res => {
-          console.log(res);
+        .post("/api/admin/zuoyesubmitquery", { zuoyeid: this.id })
+           .then(res => {
+          if (res.data.code == 0 && res.data.data.data.length) {
+            console.log("userquery", res);
+            this.listData = res.data.data.data;
+            for (let v of this.listData) {
+              (v.studentname = "学生姓名"), (v.filetext = "文本");
+              (v.file = "文件");
+            }
+            this.$message({
+              type: "success",
+              message: "加载成功"
+            });
+          } else {
+            this.$message({
+              type: "info",
+              message: "加载失败"
+            });
+          }
         })
-        .catch(() => {
-          console.log("res");
+        .catch(res => {
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
         });
-    },
-    //搜索
-    handleSeach() {},
-    //导出
-    handleDownload() {},
-    //导入
-    handleExport() {},
-    //编辑or新增
-    handleClickUpdateData(row, index) {
-      this.openForm = index;
-      if (!this.openForm && row.id) {
-        row = {
-          role: "",
-          account: "",
-          name: "",
-          password: ""
-        };
-      }
-      this.temp = row;
-      this.dialogFormVisible = true;
-      this.$nextTick(() => {
-        this.$refs["dataForm"].clearValidate();
-      });
-    },
-    //查看
-    handleClickSee(row) {
-      console.log(row);
     },
     //删除
     handleClickDeleteData(row) {
@@ -227,9 +90,12 @@ export default {
       })
         .then(() => {
           this.$http
-            .post("api/admin/userdelete", { id: row.id })
+            .post("api/admin/zuoyesubmitdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
+                 this.listData = this.listData.filter(v => {
+                  return v.id != row.id;
+                });
                 this.$message({
                   type: "success",
                   message: "删除成功!"
@@ -255,44 +121,9 @@ export default {
           });
         });
     },
-    //保存 编辑or新增
-    createData() {
-      this.$refs["dataForm"].validate(valid => {
-        if (valid) {
-          this.$http
-            .post("/api/admin/useradd", this.temp)
-            .then(res => {
-              if (res.data.code == 0) {
-                console.log(res);
-                this.$message({
-                  type: "success",
-                  message: this.openFormStateText + "成功"
-                });
-                this.init();
-              } else {
-                this.$message({
-                  type: "error",
-                  message: res.data.msg
-                });
-              }
-            })
-            .catch(res => {
-              this.$message({
-                type: "error",
-                message: res.data.msg
-              });
-              console.log("res");
-            });
-        }
-      });
-    },
-    init() {
-      this.temp = {
-        role: "",
-        account: "",
-        name: "",
-        password: ""
-      };
+    back() {
+      let data = { row: "", state: true };
+      this.$emit("zuoyeSubmit", data);
     }
   }
 };

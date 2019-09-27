@@ -47,12 +47,6 @@ const myRouter=new Router({
         meta:{title:'作业管理'}
       },
       {
-        path:'/allsubmit',
-        component: getComponent('zuoye','allSubmit'),
-        name:'allsubmit',
-        meta:{title:'学生提交'}
-      },
-      {
         path:'/allComment',
         component: getComponent('comment','allComment'),
         name:'allComment',

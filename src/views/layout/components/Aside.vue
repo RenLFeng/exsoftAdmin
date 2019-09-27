@@ -84,10 +84,6 @@ export default {
               index: "allZuoye",
               title: "所有作业"
             },
-             {
-              index: "allsubmit",
-              title: "学生提交"
-            },
           ]
         },
           {

@@ -7,11 +7,10 @@ import './assets/css/normalize.css'
 import './assets/css/public.css'
 import './assets/css/style.css'
 import '@/element-variables.scss'
+import './assets/scss/global.scss'
+import '@/assets/icon/iconfont.css'
 import axios from 'axios'
 Vue.prototype.$http = axios
-import './assets/scss/global.scss'
-// 引入字体文件
-import '@/assets/icon/iconfont.css'
 Vue.config.productionTip = false
 new Vue({
   router,

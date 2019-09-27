@@ -15,31 +15,26 @@
         class="filter-item"
         @keyup.enter.native="handleSeach"
       />
-      <el-input
-        v-model="listQuery.role"
-        placeholder="角色类型"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
+      <el-select v-model="listQuery.role" placeholder="角色类型" style="width: 200px;margin-right:5px;">
+        <el-option v-for="v in roleType" :key="v.role" :label="v.label" :value="v.role"></el-option>
+      </el-select>
       <el-select
-        v-model="listQuery.sort"
+        v-model="listQuery.order"
         placeholder="排序"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleSeach"
       >
-        <el-option label="升序" value="1" />
-        <el-option label="降序" value="0" />
+        <el-option label="升序" value="asc" />
+        <el-option label="降序" value="desc" />
       </el-select>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleDownload"
-      >导出</el-button>
+      <ExportData
+        :isForBidden="ExportDataState"
+        :tHeaderFather="tHead"
+        :filterArrayLists="allUserData"
+        :ExportFileName="ExportFileName"
+      ></ExportData>
       <el-button
         :loading="downloadLoading"
         class="filter-item"
@@ -50,14 +45,19 @@
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
     </div>
     <el-table :data="allUserData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in allUserTableList.slice(0,3)" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column
+        v-for="(v,i) in userTableHead.slice(0,3)"
+        :prop="v.prop"
+        :label="v.title"
+        :key="i"
+      ></el-table-column>
       <el-table-column prop="avatar" label="头像">
         <template slot-scope="scope">
-          <img :src="scope.row.avatar" alt>
+          <img class="tabel-img" :src="scope.row.avatar" alt />
         </template>
       </el-table-column>
       <el-table-column
-        v-for="v in allUserTableList.slice(3)"
+        v-for="v in userTableHead.slice(3)"
         :prop="v.prop"
         :label="v.title"
         :key="v.prop"
@@ -92,7 +92,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="密码:" prop="password">
-          <el-input placeholder="请输入密码" v-model="temp.password" show-password></el-input>
+          <el-input type="password" placeholder="请输入密码" v-model="temp.password" show-password></el-input>
           <!-- <el-date-picker v-model="temp.password" type="datetime" placeholder="Please pick a date" /> -->
         </el-form-item>
       </el-form>
@@ -105,63 +105,24 @@
 </template>
 
 <script>
-import { userTableHead, roleType } from "@/common.js";
-const allUserData = [
-  {
-    id: 1005,
-    role: 5,
-    account: "student3",
-    name: "student3",
-    password: "student3",
-    salt: "",
-    states: 1,
-    activetime: "0000-00-00 00:00:00",
-    createtime: "0000-00-00 00:00:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0
-  },
-  {
-    id: 1006,
-    role: 3,
-    account: "student1",
-    name: "student1",
-    password: "student1",
-    salt: "",
-    states: 1,
-    activetime: "2019-07-05 10:20:00",
-    createtime: "2019-02-02 10:40:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0
-  },
-  {
-    id: 1000,
-    role: 5,
-    account: "student3",
-    name: "student3",
-    password: "student3",
-    salt: "",
-    states: 1,
-    activetime: "0000-00-00 00:00:00",
-    createtime: "0000-00-00 00:00:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0
-  }
-];
+import { filterKey } from "@/util";
+import { userTableHead, userTableHead2, roleType } from "@/common";
+import ExportData from "@/views/component/ExportData";
 export default {
   name: "",
+  components: {
+    ExportData
+  },
   data() {
     return {
       listQuery: {
         account: "",
         role: "",
         name: "",
-        sort: "1"
+        order: ""
       },
-      allUserTableList: [],
-      allUserData: allUserData,
+      userTableHead: userTableHead,
+      allUserData: [],
       downloadLoading: false,
       dialogFormVisible: false,
       temp: {
@@ -179,12 +140,15 @@ export default {
           { required: true, message: "请至少选择一个角色", trigger: "blur" }
         ],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }]
-      }
+      },
+      ExportDataState: false,
+      ExportFileName: "表格",
+      tHead: userTableHead2,
+      seachData:{}
     };
   },
   created() {
-    this.getAllUser();
-    this.allUserTableList = userTableHead;
+    this.getAllUser({});
   },
   computed: {
     openFormStateText() {
@@ -193,33 +157,38 @@ export default {
   },
   methods: {
     //获取所有用户数据
-       getAllUser() {
+    getAllUser(data) {
       this.$http
-        .post("/api/admin/userquery", {})
+        .post("/api/admin/userquery", data)
         .then(res => {
           if (res.data.code == 0) {
-            console.log(res);
+            // console.log('userquery',res);
+            this.allUserData = res.data.data.data;
             this.$message({
               type: "success",
               message: "获取用户数据成功"
             });
           } else {
-              this.$message({
+            this.$message({
               type: "info",
               message: "获取用户数据失败"
             });
           }
         })
         .catch(res => {
-          console.log("res");
           this.$message({
             type: "error",
             message: res.data.msg
           });
         });
     },
-    //搜索
-    handleSeach() {},
+    // //搜索  
+    handleSeach() {
+      this.seachInitData();
+      this.getAllUser(this.seachData);
+      this.init();
+      this.seachData={};
+    },
     //导出
     handleDownload() {},
     //导入
@@ -257,6 +226,9 @@ export default {
             .post("api/admin/userdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
+                this.allUserData = this.allUserData.filter(v => {
+                  return v.id != row.id;
+                });
                 this.$message({
                   type: "success",
                   message: "删除成功!"
@@ -285,12 +257,19 @@ export default {
     //保存 编辑or新增
     createData() {
       this.$refs["dataForm"].validate(valid => {
+        let json = {};
+        json.data = [];
+        json.data[0] = this.temp;
         if (valid) {
           this.$http
-            .post("/api/admin/useradd", this.temp)
+            .post("/api/admin/useradd", json)
             .then(res => {
               if (res.data.code == 0) {
-                console.log(res);
+                // if(!this.openForm){
+                //   this.allUserData=[...json.data,...this.allUserData]
+                // }
+                this.getAllUser();
+                this.dialogFormVisible = false;
                 this.$message({
                   type: "success",
                   message: this.openFormStateText + "成功"
@@ -320,6 +299,26 @@ export default {
         name: "",
         password: ""
       };
+      this.listQuery={
+        account: "",
+        role: "",
+        name: "",
+        order: ""
+      }
+    },
+    seachInitData(){
+      if(this.listQuery.account){
+        this.seachData.account=this.listQuery.account
+      }
+       if(this.listQuery.role){
+        this.seachData.role=this.listQuery.role
+      }
+       if(this.listQuery.name){
+        this.seachData.name=this.listQuery.name
+      }
+       if(this.listQuery.order){
+        this.seachData.order=this.listQuery.order
+      }
     }
   }
 };

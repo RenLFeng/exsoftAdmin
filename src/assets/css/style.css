@@ -29,3 +29,19 @@
   .el-button--small,.el-button + .el-button{
     margin: 2px;
 }
+.tabel-img{
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+}
+.download-content{
+  display: flex;
+  width:100%;
+  height:100%;
+  align-items: center;
+  justify-content: space-between;
+  color: #409EFF;
+}
+.iconfont.download{
+  font-size: 35px;
+}

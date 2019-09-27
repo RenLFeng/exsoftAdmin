@@ -36,7 +36,7 @@ export const userTableHead = [{
 },
 ]
 
-export const bankeTableHead =  [{
+export const userTableHead2=[{
     fixed: '',
     prop: 'id',
     title: 'ID',
@@ -45,12 +45,50 @@ export const bankeTableHead =  [{
 {
     fixed: '',
     prop: 'account',
+    title: '账户名',
+    width: '',
+},
+{
+    fixed: '',
+    prop: 'role',
+    title: '角色名',
+    width: '',
+},
+{
+    fixed: '',
+    prop: 'avatar',
+    title: '头像',
+    width: '',
+},
+{
+    fixed: '',
+    prop: 'name',
+    title: '角色',
+    width: '',
+},
+{
+    fixed: '',
+    prop: 'createtime',
+    title: '最后登录时间',
+    width: '',
+},]
+
+
+export const bankeTableHead =  [{
+    fixed: '',
+    prop: 'id',
+    title: 'ID',
+    width: '',
+},
+{
+    fixed: '',
+    prop: 'name',
     title: '班课名',
     width: '',
 },
 {
     fixed: '',
-    prop: 'nb',
+    prop: 'membernum',
     title: '成员数',
     width: '',
 },
@@ -62,7 +100,7 @@ export const bankeTableHead =  [{
 },
 {
     fixed: '',
-    prop: 'activetime',
+    prop: 'usercreatetime',
     title: '创建时间',
     width: '',
 },
@@ -75,25 +113,25 @@ export const zuoyeTableHead = [{
 },
 {
     fixed: '',
-    prop: 'zuoyetitle',
+    prop: 'name',
     title: '作业标题',
     width: '',
 },
 {
     fixed: '',
-    prop: 'detalis',
+    prop: 'detaildesc',
     title: '详情',
     width: '',
 },
+// {
+//     fixed: '',
+//     prop: 'file',
+//     title: '文件',
+//     width: '',
+// },
 {
     fixed: '',
-    prop: 'file',
-    title: '文件',
-    width: '',
-},
-{
-    fixed: '',
-    prop: 'createbanke',
+    prop: 'ownerid',
     title: '发布班课',
     width: '',
 },
@@ -105,7 +143,7 @@ export const zuoyeTableHead = [{
 },
 {
     fixed: '',
-    prop: 'createaccount',
+    prop: 'userid',
     title: '发布账户',
     width: '',
 },
@@ -117,7 +155,7 @@ export const zuoyeTableHead = [{
 },
 {
     fixed: '',
-    prop: 'answer',
+    prop: 'answerdesc',
     title: '答案',
     width: '',
 },
@@ -136,7 +174,7 @@ export const zuoyeSubmitTableHead = [{
 },
 {
     fixed: '',
-    prop: 'studentaccount',
+    prop: 'submitid',
     title: '学生账户',
     width: '',
 },
@@ -160,19 +198,19 @@ export const zuoyeSubmitTableHead = [{
 },
 {
     fixed: '',
-    prop: 'mark',
+    prop: 'score',
     title: '评分',
     width: '',
 },
 {
     fixed: '',
-    prop: 'commentnumber',
+    prop: 'commentnum',
     title: '评论数',
     width: '',
 },
 {
     fixed: '',
-    prop: 'submithistorynumber',
+    prop: 'submitnum',
     title: '历史提交次数',
     width: '',
 },
@@ -185,36 +223,35 @@ export  const commentTableHead = [{
 },
 {
     fixed: '',
-    prop: 'account',
+    prop: 'userid',
     title: '发言账户',
     width: '',
 },
 {
     fixed: '',
-    prop: 'role',
+    prop: 'username',
     title: '发言姓名',
     width: '',
 },
 {
     fixed: '',
-    prop: 'avatar',
+    prop: 'content',
     title: '发言内容',
     width: '',
 },
 {
     fixed: '',
-    prop: 'name',
+    prop: 'createtime',
     title: '发言时间',
     width: '',
 },
-{
-    fixed: '',
-    prop: 'createtime',
-    title: '关联的内容',
-    width: '',
-},
+// {
+//     fixed: '',
+//     prop: 'filepath',
+//     title: '关联的内容',
+//     width: '',
+// },
 ]
-
 export  const ansnwerTableHead = [{
     fixed: '',
     prop: 'id',
@@ -223,56 +260,57 @@ export  const ansnwerTableHead = [{
 },
 {
     fixed: '',
-    prop: 'account',
+    prop: 'fromuserid',
     title: '发言账户',
     width: '',
 },
 {
     fixed: '',
-    prop: 'role',
+    prop: 'fromusername',
     title: '发言姓名',
     width: '',
 },
 {
     fixed: '',
-    prop: 'avatar',
+    prop: 'content',
     title: '发言内容',
     width: '',
 },
-,
+// {
+//     fixed: '',
+//     prop: 'filename',
+//     title: '提交文件',
+//     width: '',
+// },
 {
     fixed: '',
-    prop: 'avatar',
-    title: '提交文件',
-    width: '',
-},
-{
-    fixed: '',
-    prop: 'avatar',
+    prop: 'createtime',
     title: '发言时间',
     width: '',
 },
 {
     fixed: '',
-    prop: 'name',
+    prop: 'tcommentid',
     title: '回复账户',
     width: '',
 },
 {
     fixed: '',
-    prop: 'createtime',
+    prop: 'tousername',
     title: '回复姓名',
     width: '',
 },
-{
-    fixed: '',
-    prop: 'createtime',
-    title: '相关评论',
-    width: '',
-},
+// {
+//     fixed: '',
+//     prop: 'createtime',
+//     title: '相关评论',
+//     width: '',
+// },
 ]
 export const roleType = [
-{role:1,label:'学生'},
-{role:2,label:'教师'},
-{role:3,label:'管理员'}
+{role:5,label:'学生'},
+{role:10,label:'教师'},
+{role:100,label:'管理员'}
 ]
+
+export const  prefix=process.env.VUE_APP_HOST || "http://192.168.0.2:81";

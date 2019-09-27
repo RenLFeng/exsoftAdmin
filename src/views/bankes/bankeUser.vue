@@ -1,24 +1,6 @@
 <template>
   <div class="allBanke-container">
     <div class="search-content filter-container">
-      <el-input
-        v-model="listQuery.name"
-        placeholder="班课名"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-select
-        v-model="listQuery.order"
-        placeholder="排序"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      >
-        <el-option label="升序" value="asc" />
-        <el-option label="降序" value="desc" />
-      </el-select>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
       <ExportData
         :isForBidden="ExportDataState"
         :tHeaderFather="tHead"
@@ -32,14 +14,13 @@
         icon="el-icon-download"
         @click="handleExport"
       >导入</el-button>
-      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(banKe,0)">新增</el-button>
+      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(0)">添加</el-button>
+       <el-button class="filter-item"  @click="back()">返回</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in bankeTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
-          <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看成员</el-button>
-          <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -54,9 +35,12 @@
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="班课名:" prop="name">
-          <el-input v-model="banKe.name" placeholder="班课名"></el-input>
+        <el-form-item label="班课成员:" prop="account">
+          <el-input v-model="banKe.teacher" placeholder="请输入姓名"></el-input>
         </el-form-item>
+        <!-- <el-form-item label="班课名:" prop="teacher">
+          <el-input v-model="banKe.account" placeholder="班课名"></el-input>
+        </!--> 
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -67,12 +51,34 @@
 </template>
 
 <script>
-import { filterKey } from "@/util";
-import { bankeTableHead, roleType } from "@/common.js";
+import {roleType } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
+const tHead = [
+   {
+    fixed: "",
+    prop: "id",
+    title: "ID",
+    width: ""
+  },
+  {
+    fixed: "",
+    prop: "memberuserid",
+    title: "账户",
+    width: ""
+  },
+  {
+    fixed: "",
+    prop: "classid",
+    title: "姓名",
+    width: ""
+  }
+];
 export default {
   name: "",
+  props:[
+      "id"
+  ],
   components: {
     createrUser,
     ExportData
@@ -81,51 +87,44 @@ export default {
     return {
       listQuery: {
         name: "",
-        order: ""
+        order: "desc"
       },
-      bankeTableHead: bankeTableHead,
+      tHead: tHead,
       listData: [],
       downloadLoading: false,
       dialogFormVisible: false,
       banKe: {
-        name: ""
+        account: "",
+        teacher: ""
       },
       roleType: roleType,
       openForm: 0,
       rules: {
         account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
-        name: [{ required: true, message: "请输入班课名", trigger: "blur" }]
+        teacher: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
       ExportFileName: "表格",
-      tHead: bankeTableHead
+      tHead: tHead
     };
   },
   created() {
-    this.getAllUser({});
+    this.getAllUser();
   },
   computed: {
     openFormStateText() {
-      return this.openForm ? "编辑班课" : "新增班课";
+      return this.openForm ? "编辑成员" : "新增成员";
     }
   },
   methods: {
     //获取所有用户数据
-    getAllUser(data) {
+    getAllUser() {
       this.$http
-        .post("/api/admin/bankequery", data)
+        .post("/api/admin/bankememberquery", {classid:1001})
         .then(res => {
           if (res.data.code == 0 && res.data.data.data.length) {
             this.listData = res.data.data.data;
             console.log(res);
-              for (let v of res.data.data.users) {
-                for (let i of this.listData) {
-                  if (v.id == i.userid) {
-                    i.teacher = v.account;
-                  }
-                }
-              }
-              // console.log("userquery", this.listData);
             this.$message({
               type: "success",
               message: "加载成功"
@@ -148,22 +147,12 @@ export default {
     //搜索
     handleSeach() {
       this.getAllUser(this.listQuery);
-      this.listQuery = {
-        name: "",
-        order: ""
-      };
     },
     //导入
     handleExport() {},
     //编辑or新增
-    handleClickUpdateData(row, index) {
+    handleClickUpdateData(index) {
       this.openForm = index;
-      if (!this.openForm && row.id) {
-        row = {
-          name: ""
-        };
-      }
-      this.banKe = row;
       this.dialogFormVisible = true;
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
@@ -171,8 +160,7 @@ export default {
     },
     //查看
     handleClickSee(row) {
-      let data = { row: row, state: false };
-      this.$emit("bankeUser", data);
+      console.log(row);
     },
     //删除
     handleClickDeleteData(row) {
@@ -183,7 +171,7 @@ export default {
       })
         .then(() => {
           this.$http
-            .post("api/admin/bankedelete", { id: row.id })
+            .post("api/admin/bankememberdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
                 this.listData = this.listData.filter(v => {
@@ -218,15 +206,11 @@ export default {
     createData() {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
-          let json = {};
-          json.data = [];
-          json.data[0] = this.banKe;
           this.$http
-            .post("/api/admin/bankeadd", json)
+            .post("/api/admin/bankememberadd", this.banKe)
             .then(res => {
               if (res.data.code == 0) {
-                this.getAllUser({});
-                this.dialogFormVisible = false;
+                console.log(res);
                 this.$message({
                   type: "success",
                   message: this.openFormStateText + "成功"
@@ -251,8 +235,15 @@ export default {
     },
     init() {
       this.banKe = {
-        name: ""
+        role: "",
+        account: "",
+        name: "",
+        password: ""
       };
+    },
+    back(){
+        let data={row:'',state:true}
+        this.$emit('bankeUser',data);
     }
   }
 };

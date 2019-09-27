@@ -2,161 +2,56 @@
   <div class="alluser-container">
     <div class="search-content filter-container">
       <el-input
-        v-model="listQuery.account"
-        placeholder="账户名"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-input
-        v-model="listQuery.name"
-        placeholder="姓名"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleSeach"
-      />
-      <el-input
-        v-model="listQuery.role"
-        placeholder="角色类型"
+        v-model="listQuery.timerangebegin"
+        placeholder="发布时间"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleSeach"
       />
       <el-select
-        v-model="listQuery.sort"
+        v-model="listQuery.order"
         placeholder="排序"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleSeach"
       >
-        <el-option label="升序" value="1" />
-        <el-option label="降序" value="0" />
+        <el-option label="升序" value="asc" />
+        <el-option label="降序" value="desc" />
       </el-select>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleDownload"
-      >导出</el-button>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleExport"
-      >导入</el-button>
-      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
     </div>
-    <el-table :data="allUserData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in allUserTableList" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+    <el-table :data="listData" border style="width: 100%" size="small">
+      <el-table-column v-for="(v,i) in commentTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column prop="filename" label="关联的内容">
+        <template slot-scope="scope">
+          <download v-if="scope.row.files" :href="prefix+scope.row.files.filepath" :filename="scope.row.files.filename" />
+        </template>
+      </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <!-- <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看</el-button> -->
-          <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- /// -->
-    <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible">
-      <el-form
-        :rules="rules"
-        ref="dataForm"
-        :model="temp"
-        label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left:50px;"
-      >
-        <el-form-item label="账户名:" prop="account">
-          <el-input v-model="temp.account" placeholder="请输入账户名"></el-input>
-        </el-form-item>
-        <el-form-item label="姓名:" prop="name">
-          <el-input v-model="temp.name" placeholder="请输入姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="角色:" prop="role">
-          <el-select v-model="temp.role" placeholder="请选择">
-            <el-option v-for="v in roleType" :key="v.role" :label="v.label" :value="v.role"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="密码:" prop="password">
-          <el-input placeholder="请输入密码" v-model="temp.password" show-password></el-input>
-          <!-- <el-date-picker v-model="temp.password" type="datetime" placeholder="Please pick a date" /> -->
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="createData()">确定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { bankeTableHead, roleType } from '@/common.js';
-const allUserData = [
-  {
-    id: 1005,
-    role: 5,
-    account: "student3",
-    name: "student3",
-    password: "student3",
-    salt: "",
-    states: 1,
-    activetime: "0000-00-00 00:00:00",
-    createtime: "0000-00-00 00:00:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0,
-    nb:3,
-    teacher:'teacher1'
-  },
-  {
-    id: 1006,
-    role: 3,
-    account: "student1",
-    name: "student1",
-    password: "student1",
-    salt: "",
-    states: 1,
-    activetime: "2019-07-05 10:20:00",
-    createtime: "2019-02-02 10:40:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0,
-      nb:3,
-    teacher:'teacher1'
-  },
-  {
-    id: 10046,
-    role: 3,
-    account: "sds",
-    name: "studencccct1",
-    password: "studencxzct1",
-    salt: "",
-    states: 1,
-    activetime: "2019-07-05 10:20:00",
-    createtime: "2019-02-02 10:40:00",
-    avatar: "/student.png",
-    detail: null,
-    sex: 0,
-      nb:3,
-    teacher:'teacher1'
-  }
-];
+import { commentTableHead, roleType, prefix } from "@/common.js";
+import download from "../component/download";
 export default {
   name: "",
+  components: {
+    download
+  },
   data() {
     return {
       listQuery: {
-        account: "",
-        role: "",
-        name: "",
-        sort: "1"
+        timerangebegin: "",
+        order: "desc"
       },
-      allUserTableList: [],
-      allUserData: allUserData,
+      commentTableHead: commentTableHead,
+      listData: [],
       downloadLoading: false,
       dialogFormVisible: false,
       temp: {
@@ -167,63 +62,50 @@ export default {
       },
       roleType: roleType,
       openForm: 0,
-      rules: {
-        account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
-        name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        role: [
-          { required: true, message: "请至少选择一个角色", trigger: "blur" }
-        ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
-      }
+      prefix: prefix
     };
   },
   created() {
-    this.getAllUser();
-    this.allUserTableList = bankeTableHead;
+    this.getAllUser({});
   },
-  computed: {
-    openFormStateText() {
-      return this.openForm ? "编辑用户" : "新增用户";
-    }
-  },
+  computed: {},
   methods: {
     //获取所有用户数据
-    getAllUser() {
+    getAllUser(data) {
       this.$http
-        .post("/api/api/bankequery", {})
+        .post("/api/admin/commentquery", data)
         .then(res => {
-          console.log(res);
+          if (res.data.code == 0) {
+            console.log("userquery", res);
+            this.listData = res.data.data.data;
+            for (let v of this.listData) {
+              if (v.files) {
+                v.files = JSON.parse(v.files);
+                v.filename = v.files.filename;
+              }
+            }
+            this.$message({
+              type: "success",
+              message: "获取用户数据成功"
+            });
+          } else {
+            this.$message({
+              type: "info",
+              message: "获取用户数据失败"
+            });
+          }
         })
-        .catch(() => {
-          console.log("res");
+        .catch(res => {
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
         });
     },
-    //搜索
-    handleSeach() {},
-    //导出
-    handleDownload() {},
-    //导入
-    handleExport() {},
-    //编辑or新增
-    handleClickUpdateData(row, index) {
-      this.openForm = index;
-      if (!this.openForm && row.id) {
-        row = {
-          role: "",
-          account: "",
-          name: "",
-          password: ""
-        };
-      }
-      this.temp = row;
-      this.dialogFormVisible = true;
-      this.$nextTick(() => {
-        this.$refs["dataForm"].clearValidate();
-      });
-    },
-    //查看
-    handleClickSee(row) {
-      console.log(row);
+    //搜索 asc desc
+
+    handleSeach() {
+      this.getAllUser(this.listQuery);
     },
     //删除
     handleClickDeleteData(row) {
@@ -234,9 +116,12 @@ export default {
       })
         .then(() => {
           this.$http
-            .post("api/admin/userdelete", { id: row.id })
+            .post("api/admin/commentdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
+                this.listData = this.listData.filter(v => {
+                  return v.id != row.id;
+                });
                 this.$message({
                   type: "success",
                   message: "删除成功!"
@@ -261,45 +146,6 @@ export default {
             message: "已取消删除"
           });
         });
-    },
-    //保存 编辑or新增
-    createData() {
-      this.$refs["dataForm"].validate(valid => {
-        if (valid) {
-          this.$http
-            .post("/api/admin/useradd", this.temp)
-            .then(res => {
-              if (res.data.code == 0) {
-                console.log(res);
-                this.$message({
-                  type: "success",
-                  message: this.openFormStateText + "成功"
-                });
-                this.init();
-              } else {
-                this.$message({
-                  type: "error",
-                  message: res.data.msg
-                });
-              }
-            })
-            .catch(res => {
-              this.$message({
-                type: "error",
-                message: res.data.msg
-              });
-              console.log("res");
-            });
-        }
-      });
-    },
-    init() {
-      this.temp = {
-        role: "",
-        account: "",
-        name: "",
-        password: ""
-      };
     }
   }
 };

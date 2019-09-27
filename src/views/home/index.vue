@@ -101,10 +101,13 @@
             <ul>
               <li class="accout">我的账户</li>
               <li class="tou">
-                <img src="../../assets/img/tou.jpg">
+                  <img
+              :src="loginUser.avatar"
+              class="user-avatar"
+            />
                 <br>
                 <span>
-                  zyh
+                     {{loginUser.account}}
                   <br>
                   <span>超级管理员</span>
                 </span>
@@ -123,7 +126,7 @@
         <div id="charts" ref="charts"></div>
       </el-col>
     </el-row>
-    <el-row :gutter="40">
+    <!-- <el-row :gutter="40">
       <el-col :lg="12">
         <el-table :data="tableData" style="width: 100%" class="users">
           <el-table-column prop="name" label="用户名" width="180"></el-table-column>
@@ -134,13 +137,13 @@
       <el-col :lg="12">
         <div class="todulist">
           <div class="item" v-for="(item,i) in todulist" :key="i" @click="toDo(item,i)">
-            <!-- <input type="checkbox" :checked="item.checked" class="ipcont"> -->
+            <input type="checkbox" :checked="item.checked" class="ipcont">
             <el-checkbox v-model="item.checked"></el-checkbox>
             <span :class="item.checked?'done':''">{{item.todo}}</span>
           </div>
         </div>
       </el-col>
-    </el-row>
+    </el-row> -->
   </div>
 </template>
 <script>
@@ -148,6 +151,7 @@
 import countTo from "vue-count-to";
 //引入echarts 插件
 import echarts from "echarts";
+import { mapState } from "vuex";
 export default {
   name: "home",
   components: { countTo },
@@ -206,6 +210,9 @@ export default {
   mounted() {
     this.drawChart();
     this.init();
+  },
+    computed: {
+      ...mapState(["loginUser"]),
   },
   methods: {
     init() {
