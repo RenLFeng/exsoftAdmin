@@ -28,7 +28,7 @@
                   :index="threeItem.index"
                 >{{ threeItem.title }}</el-menu-item>
               </el-submenu>
-              <el-menu-item v-else :index="subItem.index" :key="subItem.index">{{ subItem.title }}</el-menu-item>
+              <el-menu-item  v-else :index="subItem.index" :key="subItem.index">{{ subItem.title }}</el-menu-item>
             </template>
           </el-submenu>
         </template>
@@ -108,7 +108,7 @@ export default {
         {
           icon: "el-icon-edit-outline",
           index: "icon",
-          title: "自定义图标"
+          title: "excel"
         },
         // {
         //   icon: "el-icon-edit-outline",
@@ -223,9 +223,6 @@ export default {
   }
   .el-menu--collapse {
     height: 100%;
-  }
-  .el-menu-item.is-active{
-    // background-color: rgb(0, 0, 0)!important;
   }
 }
 </style>

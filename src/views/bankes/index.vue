@@ -23,7 +23,7 @@ export default {
   methods: {
     onBankeUser(data){
       this.state=data.state
-      this.id=data.row.userid
+      this.id=data.row.id
     }
   }
 };

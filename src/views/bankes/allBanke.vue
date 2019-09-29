@@ -25,13 +25,7 @@
         :filterArrayLists="listData"
         :ExportFileName="ExportFileName"
       ></ExportData>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleExport"
-      >导入</el-button>
+      <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(banKe,0)">新增</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
@@ -44,7 +38,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- /// -->
+    <!-- dialog -->
     <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible" class="creater-form">
       <el-form
         :rules="rules"
@@ -63,6 +57,20 @@
         <el-button type="primary" @click="createData()">确定</el-button>
       </div>
     </el-dialog>
+
+    <!-- <div class="app-container">
+      <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
+      <el-table :data="tableData" border highlight-current-row style="width: 100%;margin-top:20px;">
+        <el-table-column v-for="item of tableHeader" :key="item" :prop="item" :label="item" />
+        <el-table-column v-if="tableData.length" label="操作" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看成员</el-button>
+          <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
+          <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
+        </template>
+      </el-table-column>
+      </el-table>
+    </div> -->
   </div>
 </template>
 
@@ -71,14 +79,19 @@ import { filterKey } from "@/util";
 import { bankeTableHead, roleType } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
+import UploadExcelComponent from "@/views/component/importExcel";
 export default {
   name: "",
   components: {
     createrUser,
-    ExportData
+    ExportData,
+    UploadExcelComponent
   },
   data() {
     return {
+      tableData: [],
+      tableHeader: [],
+
       listQuery: {
         name: "",
         order: ""
@@ -110,6 +123,24 @@ export default {
     }
   },
   methods: {
+    beforeUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1;
+      if (isLt1M) {
+        return true;
+      }
+      this.$message({
+        message: "Please do not upload files larger than 1m in size.",
+        type: "warning"
+      });
+      return false;
+    },
+    handleSuccess({ results, header }) {
+      console.log("表头", header);
+      console.log("数据", results);
+      this.tableData = results;
+      this.tableHeader = header;
+    },
+
     //获取所有用户数据
     getAllUser(data) {
       this.$http
@@ -118,14 +149,14 @@ export default {
           if (res.data.code == 0 && res.data.data.data.length) {
             this.listData = res.data.data.data;
             console.log(res);
-              for (let v of res.data.data.users) {
-                for (let i of this.listData) {
-                  if (v.id == i.userid) {
-                    i.teacher = v.account;
-                  }
+            for (let v of res.data.data.users) {
+              for (let i of this.listData) {
+                if (v.id == i.userid) {
+                  i.teacher = v.account;
                 }
               }
-              // console.log("userquery", this.listData);
+            }
+            // console.log("userquery", this.listData);
             this.$message({
               type: "success",
               message: "加载成功"
@@ -176,6 +207,7 @@ export default {
     },
     //删除
     handleClickDeleteData(row) {
+      console.log(row);
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",

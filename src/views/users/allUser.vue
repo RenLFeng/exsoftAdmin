@@ -55,7 +55,7 @@
         <template slot-scope="scope">
           <img class="tabel-img" :src="scope.row.avatar" alt />
         </template>
-      </el-table-column>
+      </el-table-column>!
       <el-table-column
         v-for="v in userTableHead.slice(3)"
         :prop="v.prop"

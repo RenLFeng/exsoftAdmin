@@ -73,8 +73,8 @@ const myRouter=new Router({
       
       {
         path:'/icon',
-        component: getComponent('icons','index'),
-        name:'icon',
+        component: getComponent('excel','upload-excel'),
+        name:'UploadExcel',
         meta:{title:'自定义图标'}
       },
       {
@@ -131,12 +131,13 @@ const myRouter=new Router({
 })
 myRouter.beforeEach((to,from,next)=>{
   NProgress.start();
-  if (to.path !='/login' && !store.state.token) {
-     next('/login')
-     NProgress.done()
-  }else{
-    next()
-  }
+  // if (to.path !='/login' && !store.state.token) {
+  //    next('/login')
+  //    NProgress.done()
+  // }else{
+  //   next()
+  // }
+  next()
 })
 myRouter.afterEach(() => {
   NProgress.done() 

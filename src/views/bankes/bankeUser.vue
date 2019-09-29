@@ -15,7 +15,7 @@
         @click="handleExport"
       >导入</el-button>
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(0)">添加</el-button>
-       <el-button class="filter-item"  @click="back()">返回</el-button>
+      <el-button class="filter-item" @click="back()">返回</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
       <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
@@ -35,12 +35,12 @@
         label-width="70px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="班课成员:" prop="account">
-          <el-input v-model="banKe.teacher" placeholder="请输入姓名"></el-input>
+        <el-form-item label="班课成员:" prop="useraccount">
+          <el-input v-model="banKe.useraccount" placeholder="请输入姓名"></el-input>
         </el-form-item>
         <!-- <el-form-item label="班课名:" prop="teacher">
           <el-input v-model="banKe.account" placeholder="班课名"></el-input>
-        </!--> 
+        </!-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -51,11 +51,11 @@
 </template>
 
 <script>
-import {roleType } from "@/common.js";
+import { roleType } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
 const tHead = [
-   {
+  {
     fixed: "",
     prop: "id",
     title: "ID",
@@ -76,9 +76,7 @@ const tHead = [
 ];
 export default {
   name: "",
-  props:[
-      "id"
-  ],
+  props: ["id"],
   components: {
     createrUser,
     ExportData
@@ -94,14 +92,16 @@ export default {
       downloadLoading: false,
       dialogFormVisible: false,
       banKe: {
-        account: "",
-        teacher: ""
+        useraccount: "",
+        classid: ""
       },
       roleType: roleType,
       openForm: 0,
       rules: {
-        account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
-        teacher: [{ required: true, message: "请输入班课名", trigger: "blur" }]
+        useraccount: [
+          { required: true, message: "请输入账户名", trigger: "blur" }
+        ]
+        // teacher: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
       ExportFileName: "表格",
@@ -120,7 +120,7 @@ export default {
     //获取所有用户数据
     getAllUser() {
       this.$http
-        .post("/api/admin/bankememberquery", {classid:1001})
+        .post("/api/admin/bankememberquery", { classid: this.id })
         .then(res => {
           if (res.data.code == 0 && res.data.data.data.length) {
             this.listData = res.data.data.data;
@@ -143,10 +143,6 @@ export default {
             message: res.data.msg
           });
         });
-    },
-    //搜索
-    handleSeach() {
-      this.getAllUser(this.listQuery);
     },
     //导入
     handleExport() {},
@@ -206,15 +202,21 @@ export default {
     createData() {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
+          this.banKe.classid = this.id;
+          let json = {};
+          json.data = [];
+          json.data[0] = this.banKe;
           this.$http
-            .post("/api/admin/bankememberadd", this.banKe)
+            .post("/api/admin/bankememberadd",json)
             .then(res => {
               if (res.data.code == 0) {
                 console.log(res);
                 this.$message({
                   type: "success",
-                  message: this.openFormStateText + "成功"
+                  message: res.data.msg
                 });
+                this.getAllUser();
+                this.dialogFormVisible=false;
                 this.init();
               } else {
                 this.$message({
@@ -224,26 +226,24 @@ export default {
               }
             })
             .catch(res => {
-              this.$message({
-                type: "error",
-                message: res.data.msg
-              });
-              console.log("res");
+              // this.$message({
+              //   type: "error",
+              //   message: res.data.msg
+              // });
+              // console.log("res");
             });
         }
       });
     },
     init() {
-      this.banKe = {
-        role: "",
-        account: "",
-        name: "",
-        password: ""
+      banKe = {
+        useraccount: "",
+        classid: ""
       };
     },
-    back(){
-        let data={row:'',state:true}
-        this.$emit('bankeUser',data);
+    back() {
+      let data = { row: "", state: true };
+      this.$emit("bankeUser", data);
     }
   }
 };
