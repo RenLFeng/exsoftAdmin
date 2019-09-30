@@ -4,7 +4,18 @@
       <el-button class="filter-item" @click="back()">返回</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column v-for="(v,i) in tHead.slice(0,4)" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column prop="files" label="提交文件">
+        <template slot-scope="scope" v-if="scope.row.files">
+          <download
+            v-for="(v,index) in scope.row.files"
+            :key="index"
+            :href="prefix+v.filepath"
+            :filename="v.filename"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column v-for="v in tHead.slice(4)" :prop="v.prop" :label="v.title" :key="v.prop"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
@@ -13,12 +24,15 @@
     </el-table>
   </div>
 </template>
-
 <script>
-import { zuoyeSubmitTableHead, roleType } from "@/common.js";
+import { zuoyeSubmitTableHead, roleType, prefix ,filter} from "@/common.js";
+import download from "../component/download";
 export default {
   name: "",
   props: ["id"],
+  components: {
+    download
+  },
   data() {
     return {
       listQuery: {
@@ -38,7 +52,8 @@ export default {
         password: ""
       },
       roleType: roleType,
-      openForm: 0
+      openForm: 0,
+      prefix: prefix
     };
   },
   created() {
@@ -55,13 +70,30 @@ export default {
     getAllUser() {
       this.$http
         .post("/api/admin/zuoyesubmitquery", { zuoyeid: this.id })
-           .then(res => {
+        .then(res => {
           if (res.data.code == 0 && res.data.data.data.length) {
             console.log("userquery", res);
             this.listData = res.data.data.data;
-            for (let v of this.listData) {
-              (v.studentname = "学生姓名"), (v.filetext = "文本");
-              (v.file = "文件");
+            filter(this.listData)
+            if (res.data.data.details.length) {
+              for (let i of res.data.data.details) {
+                for (let v of this.listData) {
+                  if (i.id == v.detailid) {
+                    v.filetext = i.ztext;
+                    v.files = JSON.parse(i.files);
+                  }
+                }
+              }
+            }
+            if (res.data.data.users.length) {
+              for (let i of res.data.data.users) {
+                for (let v of this.listData) {
+                  if (i.id == v.userid) {
+                    v.account = i.account;
+                    v.studentname = i.name;
+                  }
+                }
+              }
             }
             this.$message({
               type: "success",
@@ -93,7 +125,7 @@ export default {
             .post("api/admin/zuoyesubmitdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
-                 this.listData = this.listData.filter(v => {
+                this.listData = this.listData.filter(v => {
                   return v.id != row.id;
                 });
                 this.$message({

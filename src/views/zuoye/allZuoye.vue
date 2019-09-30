@@ -28,17 +28,23 @@
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in allUserTableList.slice(0,3)" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <el-table-column
+        v-for="(v,i) in allUserTableList.slice(0,3)"
+        :prop="v.prop"
+        :label="v.title"
+        :key="i"
+      ></el-table-column>
       <el-table-column prop="files" label="文件">
         <template slot-scope="scope" v-if="scope.row.files">
           <download
-          v-for="(v,index) in scope.row.files" :key="index"
+            v-for="(v,index) in scope.row.files"
+            :key="index"
             :href="prefix+v.filepath"
             :filename="v.filename"
           />
         </template>
       </el-table-column>
-          <el-table-column
+      <el-table-column
         v-for="v in allUserTableList.slice(3)"
         :prop="v.prop"
         :label="v.title"
@@ -56,12 +62,12 @@
 </template>
 
 <script>
-import { zuoyeTableHead, roleType, prefix } from "@/common.js";
-import download from '../component/download'
+import { zuoyeTableHead, roleType, prefix, filter } from "@/common.js";
+import download from "../component/download";
 export default {
   name: "",
-  components:{
-download
+  components: {
+    download
   },
   data() {
     return {
@@ -102,14 +108,22 @@ download
         .then(res => {
           if (res.data.code == 0 && res.data.data.data.length) {
             this.listData = res.data.data.data;
-              for (let v of res.data.data.details) {
-                for (let i of this.listData) {
-                  if (v.id == i.ztypeid) {
-                    i.files = JSON.parse(v.files);
-                  }
+            for (let i of res.data.data.bankes) {
+              for (let v of this.listData) {
+                if (i.id == v.id) {
+                  v.bankename = i.name;
                 }
               }
-              // console.log("userquery", this.listData);
+            }
+            for (let v of res.data.data.details) {
+              for (let i of this.listData) {
+                if (v.id == i.ztypeid) {
+                  i.files = JSON.parse(v.files);
+                }
+              }
+            }
+            filter(this.listData);
+            console.log("userquery", res);
             this.$message({
               type: "success",
               message: "加载成功"
@@ -261,6 +275,40 @@ download
         name: "",
         password: ""
       };
+    },
+    getBankename(data) {
+      this.$http
+        .post("/api/admin/bankequery", data)
+        .then(res => {
+          if (res.data.code == 0 && res.data.data.data.length) {
+            this.listData = res.data.data.data;
+            console.log(res);
+            for (let v of res.data.data.users) {
+              for (let i of this.listData) {
+                if (v.id == i.userid) {
+                  i.teacher = v.account;
+                }
+              }
+            }
+            // console.log("userquery", this.listData);
+            this.$message({
+              type: "success",
+              message: "加载成功"
+            });
+          } else {
+            this.$message({
+              type: "info",
+              message: "加载失败"
+            });
+          }
+        })
+        .catch(res => {
+          console.log("res");
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
+        });
     }
   }
 };

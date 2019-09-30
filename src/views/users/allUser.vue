@@ -35,13 +35,7 @@
         :filterArrayLists="allUserData"
         :ExportFileName="ExportFileName"
       ></ExportData>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleExport"
-      >导入</el-button>
+      <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(temp,0)">新增</el-button>
     </div>
     <el-table :data="allUserData" border style="width: 100%" size="small">
@@ -108,10 +102,13 @@
 import { filterKey } from "@/util";
 import { userTableHead, userTableHead2, roleType } from "@/common";
 import ExportData from "@/views/component/ExportData";
+import UploadExcelComponent from "@/views/component/importExcel";
+import { filter } from "@/common.js";
 export default {
   name: "",
   components: {
-    ExportData
+    ExportData,
+    UploadExcelComponent
   },
   data() {
     return {
@@ -144,7 +141,7 @@ export default {
       ExportDataState: false,
       ExportFileName: "表格",
       tHead: userTableHead2,
-      seachData:{}
+      seachData: {}
     };
   },
   created() {
@@ -156,14 +153,71 @@ export default {
     }
   },
   methods: {
+    beforeUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1;
+      if (isLt1M) {
+        return true;
+      }
+      this.$message({
+        message: "Please do not upload files larger than 1m in size.",
+        type: "warning"
+      });
+      return false;
+    },
+    handleSuccess({ results, header }) {
+      for (let v = 0; v < header.length; v++) {
+        if (header[v] != this.tHead[v].title) {
+          this.$alert("请查看是否修改了表头", "导入失败", {
+            confirmButtonText: "确定",
+            center: true
+          });
+          return;
+        }
+      }
+      let serveData = [];
+      for (let v of results) {
+        let json = {};
+        let key = Object.keys(v);
+        for (let i of key) {
+          switch (i) {
+            // case "ID":
+            //   json.id = v["ID"];
+            case "账户名":
+              json.account = v["账户名"];
+            case "角色名":
+              json.name = v["角色名"] || "";
+            case "角色":
+              json.role = this.seleceRole(v["角色"]);
+            case "最后登录时间":
+              json.createtime = v["最后登录时间"] || "";
+          }
+        }
+        serveData.push(json);
+      }
+      console.log("serveData", serveData);
+      // this.tableData = results;
+      // this.tableHeader = header;
+      this.createData(serveData);
+    },
+    seleceRole(v) {
+      switch (v) {
+        case "学生":
+          return 5;
+        case "教师":
+          return 10;
+        case "管理员":
+          return 100;
+      }
+    },
     //获取所有用户数据
     getAllUser(data) {
       this.$http
         .post("/api/admin/userquery", data)
         .then(res => {
           if (res.data.code == 0) {
-            // console.log('userquery',res);
+            console.log("userquery", res);
             this.allUserData = res.data.data.data;
+            filter(this.allUserData);
             this.$message({
               type: "success",
               message: "获取用户数据成功"
@@ -182,12 +236,12 @@ export default {
           });
         });
     },
-    // //搜索  
+    // //搜索
     handleSeach() {
       this.seachInitData();
       this.getAllUser(this.seachData);
       this.init();
-      this.seachData={};
+      this.seachData = {};
     },
     //导出
     handleDownload() {},
@@ -255,42 +309,56 @@ export default {
         });
     },
     //保存 编辑or新增
-    createData() {
-      this.$refs["dataForm"].validate(valid => {
-        let json = {};
-        json.data = [];
+    createData(data) {
+      if (data) {
+        this.Add(data);
+      } else {
+        this.$refs["dataForm"].validate(valid => {
+          if (valid) {
+            this.Add();
+          }
+        });
+      }
+    },
+    Add(data) {
+      let json = {};
+      json.data = [];
+      if (data) {
+        json.data = data;
+      } else {
         json.data[0] = this.temp;
-        if (valid) {
-          this.$http
-            .post("/api/admin/useradd", json)
-            .then(res => {
-              if (res.data.code == 0) {
-                // if(!this.openForm){
-                //   this.allUserData=[...json.data,...this.allUserData]
-                // }
-                this.getAllUser();
-                this.dialogFormVisible = false;
-                this.$message({
-                  type: "success",
-                  message: this.openFormStateText + "成功"
-                });
-                this.init();
-              } else {
-                this.$message({
-                  type: "error",
-                  message: res.data.msg
-                });
-              }
-            })
-            .catch(res => {
-              this.$message({
-                type: "error",
-                message: res.data.msg
-              });
-              console.log("res");
+      }
+      this.$http
+        .post("/api/admin/useradd", json)
+        .then(res => {
+          if (res.data.code == 0) {
+            this.getAllUser();
+            this.dialogFormVisible = false;
+            this.$message({
+              type: "success",
+              message: this.openFormStateText + "成功"
             });
-        }
-      });
+            this.init();
+          } else {
+            let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+            this.$message({
+              type: "error",
+              message: data ? "导入失败" : this.openFormStateText + "失败"
+            });
+            this.$alert("<div><p>请查看是否重复账户</p><p>发现如一下问题:"+errMsg+"</p></div>", data ? "导入失败" : this.openFormStateText + "失败", {
+              confirmButtonText: "确定",
+              center: true,
+               dangerouslyUseHTMLString: true
+            });
+          }
+        })
+        .catch(res => {
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
+          console.log("res");
+        });
     },
     init() {
       this.temp = {
@@ -299,25 +367,25 @@ export default {
         name: "",
         password: ""
       };
-      this.listQuery={
+      this.listQuery = {
         account: "",
         role: "",
         name: "",
         order: ""
-      }
+      };
     },
-    seachInitData(){
-      if(this.listQuery.account){
-        this.seachData.account=this.listQuery.account
+    seachInitData() {
+      if (this.listQuery.account) {
+        this.seachData.account = this.listQuery.account;
       }
-       if(this.listQuery.role){
-        this.seachData.role=this.listQuery.role
+      if (this.listQuery.role) {
+        this.seachData.role = this.listQuery.role;
       }
-       if(this.listQuery.name){
-        this.seachData.name=this.listQuery.name
+      if (this.listQuery.name) {
+        this.seachData.name = this.listQuery.name;
       }
-       if(this.listQuery.order){
-        this.seachData.order=this.listQuery.order
+      if (this.listQuery.order) {
+        this.seachData.order = this.listQuery.order;
       }
     }
   }

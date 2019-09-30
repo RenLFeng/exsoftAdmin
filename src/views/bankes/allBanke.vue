@@ -51,6 +51,9 @@
         <el-form-item label="班课名:" prop="name">
           <el-input v-model="banKe.name" placeholder="班课名"></el-input>
         </el-form-item>
+          <el-form-item label="任课教师:" prop="useraccount">
+          <el-input v-model="banKe.useraccount" placeholder="教师名"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -70,7 +73,7 @@
         </template>
       </el-table-column>
       </el-table>
-    </div> -->
+    </div>-->
   </div>
 </template>
 
@@ -101,12 +104,13 @@ export default {
       downloadLoading: false,
       dialogFormVisible: false,
       banKe: {
-        name: ""
+        name: "",
+        useraccount:""
       },
       roleType: roleType,
       openForm: 0,
       rules: {
-        account: [{ required: true, message: "请输入账户名", trigger: "blur" }],
+        useraccount: [{ required: true, message: "请输入教师名", trigger: "blur" }],
         name: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
@@ -135,10 +139,36 @@ export default {
       return false;
     },
     handleSuccess({ results, header }) {
-      console.log("表头", header);
-      console.log("数据", results);
-      this.tableData = results;
-      this.tableHeader = header;
+      for (let v = 0; v < header.length; v++) {
+        if (header[v] != this.bankeTableHead[v].title) {
+          this.$alert("请查看是否修改了表头", "导入失败", {
+            confirmButtonText: "确定",
+            center: true
+          });
+          return;
+        }
+      }
+      let serveData = [];
+      for (let v of results) {
+        let json = {};
+        let key = Object.keys(v);
+        for (let i of key) {
+          switch (i) {
+            // case "ID":
+            //   json.id = v["ID"];
+            case "班课名":
+              json.name = v["班课名"];
+            // case "成员数":
+            //   json.membernum = v["成员数"] || "";
+            case "任课教师":
+              json.useraccount = v["任课教师"] || "";
+            // case "创建时间":
+            //   json.usercreatetime = v["创建时间"] || "";
+          }
+        }
+        serveData.push(json);
+      }
+      this.createData(serveData);
     },
 
     //获取所有用户数据
@@ -172,7 +202,7 @@ export default {
           console.log("res");
           this.$message({
             type: "error",
-            message: res.data.msg
+            message: 'error'
           });
         });
     },
@@ -235,7 +265,7 @@ export default {
             .catch(res => {
               this.$message({
                 type: "error",
-                message: res.data.msg
+                message: 'error'
               });
             });
         })
@@ -247,44 +277,62 @@ export default {
         });
     },
     //保存 编辑or新增
-    createData() {
-      this.$refs["dataForm"].validate(valid => {
-        if (valid) {
-          let json = {};
-          json.data = [];
-          json.data[0] = this.banKe;
-          this.$http
-            .post("/api/admin/bankeadd", json)
-            .then(res => {
-              if (res.data.code == 0) {
-                this.getAllUser({});
-                this.dialogFormVisible = false;
-                this.$message({
-                  type: "success",
-                  message: this.openFormStateText + "成功"
-                });
-                this.init();
-              } else {
-                this.$message({
-                  type: "error",
-                  message: res.data.msg
-                });
-              }
-            })
-            .catch(res => {
-              this.$message({
-                type: "error",
-                message: res.data.msg
-              });
-              console.log("res");
-            });
-        }
-      });
+    createData(data) {
+      if (data) {
+        this.bankeAdd(data);
+      } else {
+        this.$refs["dataForm"].validate(valid => {
+          if (valid) {
+            this.bankeAdd();
+          }
+        });
+      }
     },
     init() {
       this.banKe = {
-        name: ""
+        name: "",
+        useraccount:""
       };
+    },
+    bankeAdd(data) {
+      let json = {};
+      json.data = [];
+      if (data) {
+        json.data = data;
+      } else {
+        json.data[0] = this.banKe;
+      }
+      this.$http
+        .post("/api/admin/bankeadd", json)
+        .then(res => {
+          if (res.data.code == 0) {
+            this.getAllUser({});
+            this.dialogFormVisible = false;
+            this.$message({
+              type: "success",
+              message: this.openFormStateText + "成功"
+            });
+            this.init();
+          } else {
+           let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+            this.$message({
+              type: "error",
+              message: data ? "导入失败" : this.openFormStateText + "失败"
+            });
+            this.$alert("<div><p>请查看是否重复账户</p><p>发现如一下问题:"+errMsg+"</p></div>", data ? "导入失败" : this.openFormStateText + "失败", {
+              confirmButtonText: "确定",
+              center: true,
+               dangerouslyUseHTMLString: true
+            });
+          }
+        })
+        .catch(res => {
+          this.$message({
+            type: "error",
+            message: res.data.msg
+          });
+          console.log("res");
+        });
     }
   }
 };

@@ -44,14 +44,14 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="currentPage"
       :page-size="5"
       layout="prev, pager, next, jumper"
       :total="20"
-    ></el-pagination>
+    ></el-pagination> -->
   </div>
 </template>
 

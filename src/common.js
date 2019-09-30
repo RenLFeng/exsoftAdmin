@@ -12,7 +12,7 @@ export const userTableHead = [{
 },
 {
     fixed: '',
-    prop: 'role',
+    prop: 'name',
     title: '角色名',
     width: '',
 },
@@ -24,7 +24,7 @@ export const userTableHead = [{
 // },
 {
     fixed: '',
-    prop: 'name',
+    prop: 'role',
     title: '角色',
     width: '',
 },
@@ -36,7 +36,7 @@ export const userTableHead = [{
 },
 ]
 
-export const userTableHead2=[{
+export const userTableHead2 = [{
     fixed: '',
     prop: 'id',
     title: 'ID',
@@ -50,7 +50,7 @@ export const userTableHead2=[{
 },
 {
     fixed: '',
-    prop: 'role',
+    prop: 'name',
     title: '角色名',
     width: '',
 },
@@ -62,7 +62,7 @@ export const userTableHead2=[{
 },
 {
     fixed: '',
-    prop: 'name',
+    prop: 'role',
     title: '角色',
     width: '',
 },
@@ -71,10 +71,11 @@ export const userTableHead2=[{
     prop: 'createtime',
     title: '最后登录时间',
     width: '',
-},]
+},
+]
 
 
-export const bankeTableHead =  [{
+export const bankeTableHead = [{
     fixed: '',
     prop: 'id',
     title: 'ID',
@@ -131,7 +132,7 @@ export const zuoyeTableHead = [{
 // },
 {
     fixed: '',
-    prop: 'ownerid',
+    prop: 'bankename',
     title: '发布班课',
     width: '',
 },
@@ -174,7 +175,7 @@ export const zuoyeSubmitTableHead = [{
 },
 {
     fixed: '',
-    prop: 'submitid',
+    prop: 'account',
     title: '学生账户',
     width: '',
 },
@@ -190,12 +191,12 @@ export const zuoyeSubmitTableHead = [{
     title: '提交文本',
     width: '',
 },
-{
-    fixed: '',
-    prop: 'file',
-    title: '提交文件',
-    width: '',
-},
+// {
+//     fixed: '',
+//     prop: 'files',
+//     title: '提交文件',
+//     width: '',
+// },
 {
     fixed: '',
     prop: 'score',
@@ -215,7 +216,7 @@ export const zuoyeSubmitTableHead = [{
     width: '',
 },
 ]
-export  const commentTableHead = [{
+export const commentTableHead = [{
     fixed: '',
     prop: 'id',
     title: 'ID',
@@ -245,14 +246,14 @@ export  const commentTableHead = [{
     title: '发言时间',
     width: '',
 },
-// {
-//     fixed: '',
-//     prop: 'filepath',
-//     title: '关联的内容',
-//     width: '',
-// },
+    // {
+    //     fixed: '',
+    //     prop: 'filepath',
+    //     title: '关联的内容',
+    //     width: '',
+    // },
 ]
-export  const ansnwerTableHead = [{
+export const ansnwerTableHead = [{
     fixed: '',
     prop: 'id',
     title: 'ID',
@@ -300,17 +301,47 @@ export  const ansnwerTableHead = [{
     title: '回复姓名',
     width: '',
 },
-// {
-//     fixed: '',
-//     prop: 'createtime',
-//     title: '相关评论',
-//     width: '',
-// },
+    // {
+    //     fixed: '',
+    //     prop: 'createtime',
+    //     title: '相关评论',
+    //     width: '',
+    // },
 ]
-export const roleType = [
-{role:5,label:'学生'},
-{role:10,label:'教师'},
-{role:100,label:'管理员'}
+export const roleType = [{
+    role: 5,
+    label: '学生'
+},
+{
+    role: 10,
+    label: '教师'
+},
+{
+    role: 100,
+    label: '管理员'
+}
 ]
 
-export const  prefix=process.env.VUE_APP_HOST || "http://192.168.0.2:81";
+export const prefix = process.env.VUE_APP_HOST || "http://192.168.0.2:81";
+export const filter = (v) => {
+    if (!v.length) return;
+    let key = Object.keys(v[0]);
+    console.log(key);
+    for (let i of key) {
+        switch (i) {
+            case 'state':
+                for (let i of v) {
+                    i.state == '100' ? i.state = '进行中' : i.state == '10' ? i.state = '已结束' : '未开始';
+                }
+            case 'score':
+                for (let i of v) {
+                    i.score > -1 ? i.score : (i.score = "未评分");
+                }
+            case 'role':
+                for (let i of v) {
+                    i.role == '100' ? i.role = '管理员' : i.role == '10' ? i.role = '教师' : i.role='学生';
+                }
+        }
+    }
+
+}

@@ -7,13 +7,7 @@
         :filterArrayLists="listData"
         :ExportFileName="ExportFileName"
       ></ExportData>
-      <el-button
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleExport"
-      >导入</el-button>
+      <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(0)">添加</el-button>
       <el-button class="filter-item" @click="back()">返回</el-button>
     </div>
@@ -54,6 +48,7 @@
 import { roleType } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
+import UploadExcelComponent from "@/views/component/importExcel";
 const tHead = [
   {
     fixed: "",
@@ -63,13 +58,13 @@ const tHead = [
   },
   {
     fixed: "",
-    prop: "memberuserid",
+    prop: "account",
     title: "账户",
     width: ""
   },
   {
     fixed: "",
-    prop: "classid",
+    prop: "name",
     title: "姓名",
     width: ""
   }
@@ -79,7 +74,8 @@ export default {
   props: ["id"],
   components: {
     createrUser,
-    ExportData
+    ExportData,
+    UploadExcelComponent
   },
   data() {
     return {
@@ -117,6 +113,45 @@ export default {
     }
   },
   methods: {
+    beforeUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1;
+      if (isLt1M) {
+        return true;
+      }
+      this.$message({
+        message: "Please do not upload files larger than 1m in size.",
+        type: "warning"
+      });
+      return false;
+    },
+    handleSuccess({ results, header }) {
+      for (let v = 0; v < header.length; v++) {
+        if (header[v] != tHead[v].title) {
+          this.$alert("请查看是否修改了表头", "导入失败", {
+            confirmButtonText: "确定",
+              center: true
+          });
+          return;
+        }
+      }
+      let serveData = [];
+      for (let v of results) {
+        let json = {};
+        let key = Object.keys(v);
+        for (let i of key) {
+          switch (i) {
+            // case "ID":
+            //   json.id = v["ID"];
+            case "账户":
+              json.useraccount = v["账户"] || "";
+            // case "姓名":
+            //   json.name = v["班课名"];
+          }
+        }
+        serveData.push(json);
+      }
+      this.createData(serveData);
+    },
     //获取所有用户数据
     getAllUser() {
       this.$http
@@ -124,6 +159,14 @@ export default {
         .then(res => {
           if (res.data.code == 0 && res.data.data.data.length) {
             this.listData = res.data.data.data;
+            for (let i of res.data.data.users) {
+              for (let v of this.listData) {
+                if (i.id == v.memberuserid) {
+                  v.account = i.account;
+                  v.name = i.name;
+                }
+              }
+            }
             console.log(res);
             this.$message({
               type: "success",
@@ -199,41 +242,62 @@ export default {
         });
     },
     //保存 编辑or新增
-    createData() {
-      this.$refs["dataForm"].validate(valid => {
-        if (valid) {
-          this.banKe.classid = this.id;
-          let json = {};
-          json.data = [];
-          json.data[0] = this.banKe;
-          this.$http
-            .post("/api/admin/bankememberadd",json)
-            .then(res => {
-              if (res.data.code == 0) {
-                console.log(res);
-                this.$message({
-                  type: "success",
-                  message: res.data.msg
-                });
-                this.getAllUser();
-                this.dialogFormVisible=false;
-                this.init();
-              } else {
-                this.$message({
-                  type: "error",
-                  message: res.data.msg
-                });
-              }
-            })
-            .catch(res => {
-              // this.$message({
-              //   type: "error",
-              //   message: res.data.msg
-              // });
-              // console.log("res");
-            });
+    createData(data) {
+      if (data) {
+        this.Add(data);
+      } else {
+        this.$refs["dataForm"].validate(valid => {
+          if (valid) {
+            this.Add();
+          }
+        });
+      }
+    },
+    Add(data) {
+      let json = {};
+      json.data = [];
+      if (data) {
+        for (let v of data) {
+          v.classid = this.id;
         }
-      });
+        json.data = data;
+      } else {
+        this.banKe.classid = this.id;
+        json.data[0] = this.banKe;
+      }
+
+      this.$http
+        .post("/api/admin/bankememberadd", json)
+        .then(res => {
+          if (res.data.code == 0) {
+            console.log(res);
+            this.$message({
+              type: "success",
+              message: res.data.msg
+            });
+            this.getAllUser();
+            this.dialogFormVisible = false;
+            this.init();
+          } else {
+             let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+            this.$message({
+              type: "error",
+              message: data ? "导入失败" : this.openFormStateText + "失败"
+            });
+            this.$alert("<div><p>请查看是否重复账户</p><p>发现如一下问题:"+errMsg+"</p></div>", data ? "导入失败" : this.openFormStateText + "失败", {
+              confirmButtonText: "确定",
+              center: true,
+               dangerouslyUseHTMLString: true
+            });
+          }
+        })
+        .catch(res => {
+          // this.$message({
+          //   type: "error",
+          //   message: res.data.msg
+          // });
+          // console.log("res");
+        });
     },
     init() {
       banKe = {

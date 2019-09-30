@@ -24,7 +24,11 @@
       <el-table-column v-for="(v,i) in commentTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
       <el-table-column prop="filename" label="关联的内容">
         <template slot-scope="scope">
-          <download v-if="scope.row.files" :href="prefix+scope.row.files.filepath" :filename="scope.row.files.filename" />
+          <download
+            v-if="scope.row.files"
+            :href="prefix+scope.row.files.filepath"
+            :filename="scope.row.files.filename"
+          />
         </template>
       </el-table-column>
       <el-table-column label="操作">
