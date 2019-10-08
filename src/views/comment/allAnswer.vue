@@ -29,7 +29,11 @@
       ></el-table-column>
       <el-table-column prop="filename" label="提交文件">
         <template slot-scope="scope">
-             <download v-if="scope.row.files" :href="prefix+scope.row.files.filepath" :filename="scope.row.files.filename" />
+          <download
+            v-if="scope.row.files"
+            :href="prefix+scope.row.files.filepath"
+            :filename="scope.row.files.filename"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -51,17 +55,17 @@
       :page-size="5"
       layout="prev, pager, next, jumper"
       :total="20"
-    ></el-pagination> -->
+    ></el-pagination>-->
   </div>
 </template>
 
 <script>
 import { ansnwerTableHead, roleType, prefix } from "@/common.js";
-import download from '../component/download'
+import download from "../component/download";
 const d = [];
 export default {
   name: "",
-  components:{
+  components: {
     download
   },
   data() {
@@ -98,23 +102,25 @@ export default {
         .post("/api/admin/replyquery", data)
         .then(res => {
           if (res.data.code == 0) {
-            this.listData = res.data.data.data;
-            for (let v of this.listData) {
-              if (v.files) {
-                v.files = JSON.parse(v.files);
-                v.filename = v.files.filename;
+            if (res.data.data.data.length) {
+              this.listData = res.data.data.data;
+              for (let v of this.listData) {
+                if (v.files) {
+                  v.files = JSON.parse(v.files);
+                  v.filename = v.files.filename;
+                }
               }
+              console.log("userquery", this.listData);
+              this.$message({
+                type: "success",
+                message: "获取用户数据成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
             }
-            console.log("userquery", this.listData);
-            this.$message({
-              type: "success",
-              message: "获取用户数据成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "获取用户数据失败"
-            });
           }
         })
         .catch(res => {

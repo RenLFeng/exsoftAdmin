@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import { zuoyeSubmitTableHead, roleType, prefix ,filter} from "@/common.js";
+import { zuoyeSubmitTableHead, roleType, prefix, filter } from "@/common.js";
 import download from "../component/download";
 export default {
   name: "",
@@ -71,39 +71,41 @@ export default {
       this.$http
         .post("/api/admin/zuoyesubmitquery", { zuoyeid: this.id })
         .then(res => {
-          if (res.data.code == 0 && res.data.data.data.length) {
-            console.log("userquery", res);
-            this.listData = res.data.data.data;
-            filter(this.listData)
-            if (res.data.data.details.length) {
-              for (let i of res.data.data.details) {
-                for (let v of this.listData) {
-                  if (i.id == v.detailid) {
-                    v.filetext = i.ztext;
-                    v.files = JSON.parse(i.files);
+          if (res.data.code == 0) {
+            if (res.data.data.data.length) {
+              console.log("userquery", res);
+              this.listData = res.data.data.data;
+              filter(this.listData);
+              if (res.data.data.details.length) {
+                for (let i of res.data.data.details) {
+                  for (let v of this.listData) {
+                    if (i.id == v.detailid) {
+                      v.filetext = i.ztext;
+                      v.files = JSON.parse(i.files);
+                    }
                   }
                 }
               }
-            }
-            if (res.data.data.users.length) {
-              for (let i of res.data.data.users) {
-                for (let v of this.listData) {
-                  if (i.id == v.userid) {
-                    v.account = i.account;
-                    v.studentname = i.name;
+              if (res.data.data.users.length) {
+                for (let i of res.data.data.users) {
+                  for (let v of this.listData) {
+                    if (i.id == v.userid) {
+                      v.account = i.account;
+                      v.studentname = i.name;
+                    }
                   }
                 }
               }
+              this.$message({
+                type: "success",
+                message: "加载成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
             }
-            this.$message({
-              type: "success",
-              message: "加载成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "加载失败"
-            });
           }
         })
         .catch(res => {

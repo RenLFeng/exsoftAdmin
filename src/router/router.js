@@ -131,13 +131,13 @@ const myRouter=new Router({
 })
 myRouter.beforeEach((to,from,next)=>{
   NProgress.start();
-  // if (to.path !='/login' && !store.state.token) {
-  //    next('/login')
-  //    NProgress.done()
-  // }else{
-  //   next()
-  // }
-  next()
+  if (to.path !='/login' && !store.state.token) {
+     next('/login')
+     NProgress.done()
+  }else{
+    next()
+  }
+  // next()
 })
 myRouter.afterEach(() => {
   NProgress.done() 

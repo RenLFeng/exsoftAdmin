@@ -1,5 +1,5 @@
 <template>
-  <el-button type="primary" ref="btn" :disabled="isForBidden" @click="ExportData">导出数据</el-button>
+  <el-button type="primary" ref="btn"  :loading="downloadLoading" @click="ExportData">导出数据</el-button>
 </template>
 
 <script>
@@ -26,6 +26,7 @@ export default {
   },
   methods: {
     ExportData() {
+      this.downloadLoading=true;
       let TableHead = [];
       let ListsFather=[];
       for (let v of this.tHeaderFather) {
@@ -43,7 +44,7 @@ export default {
           filename: this.ExportFileName,
           autoWidth: this.autoWidth
         });
-        // this.downloadLoading = false;
+        this.downloadLoading = false;
       });
     },
     //对数据与表头字段进行匹配

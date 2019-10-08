@@ -6,7 +6,7 @@ import {
 import {messages} from '../assets/js/common.js'
 import store from '../store/store'
 axios.defaults.timeout = 60000;
-axios.defaults.baseURL = 'http://192.168.0.2:81';
+axios.defaults.baseURL = process.env.VUE_APP_HOST || 'http://192.168.0.2:81';
 axios.defaults.headers.post["Content-Type"] =
     "application/x-www-form-urlencoded;charset=UTF-8";
 let loading = null;

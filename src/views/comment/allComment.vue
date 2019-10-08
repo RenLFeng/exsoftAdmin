@@ -80,23 +80,25 @@ export default {
         .post("/api/admin/commentquery", data)
         .then(res => {
           if (res.data.code == 0) {
-            console.log("userquery", res);
-            this.listData = res.data.data.data;
-            for (let v of this.listData) {
-              if (v.files) {
-                v.files = JSON.parse(v.files);
-                v.filename = v.files.filename;
+            if (res.data.data.data.length) {
+              console.log("userquery", res);
+              this.listData = res.data.data.data;
+              for (let v of this.listData) {
+                if (v.files) {
+                  v.files = JSON.parse(v.files);
+                  v.filename = v.files.filename;
+                }
               }
+              this.$message({
+                type: "success",
+                message: "获取用户数据成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
             }
-            this.$message({
-              type: "success",
-              message: "获取用户数据成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "获取用户数据失败"
-            });
           }
         })
         .catch(res => {

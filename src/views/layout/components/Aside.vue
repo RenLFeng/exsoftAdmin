@@ -16,7 +16,7 @@
         <template v-if="item.subs">
           <el-submenu :index="item.index" :key="item.index">
             <template slot="title">
-              <i :class="item.icon"></i>
+              <i :class="'iconfont ' +item.icon"></i>
               <span slot="title">{{ item.title }}</span>
             </template>
             <template v-for="subItem in item.subs">
@@ -34,7 +34,7 @@
         </template>
         <template v-else>
           <el-menu-item :index="item.index" :key="item.index">
-            <i :class="item.icon"></i>
+            <i :class="'iconfont ' +item.icon"></i>
             <span slot="title">{{ item.title }}</span>
           </el-menu-item>
         </template>
@@ -49,12 +49,12 @@ export default {
     return {
       items: [
         {
-          icon: "el-icon-edit-outline",
+          icon: "iconshouye",
           index: "home",
           title: "系统首页"
         },
           {
-          icon: "el-icon-edit-outline",
+          icon: "iconyonghu",
           index: "users",
           title: "用户管理",
               subs: [
@@ -65,7 +65,7 @@ export default {
           ]
         },
           {
-          icon: "el-icon-edit-outline",
+          icon: "iconbianzu",
           index: "banke",
           title: "班课管理",
                 subs: [
@@ -76,7 +76,7 @@ export default {
           ]
         },
           {
-          icon: "el-icon-edit-outline",
+          icon: "iconzhuanyeziyuanku",
           index: "zuoye",
           title: "作业管理" ,
           subs: [
@@ -87,7 +87,7 @@ export default {
           ]
         },
           {
-          icon: "el-icon-edit-outline",
+          icon: "iconxiaoxi",
           index: "comment",
           title: "评论管理",
                 subs: [
@@ -105,11 +105,11 @@ export default {
 
 
 
-        {
-          icon: "el-icon-edit-outline",
-          index: "icon",
-          title: "excel"
-        },
+        // {
+        //   icon: "el-icon-edit-outline",
+        //   index: "icon",
+        //   title: "excel"
+        // },
         // {
         //   icon: "el-icon-edit-outline",
         //   index: "component",
@@ -224,5 +224,9 @@ export default {
   .el-menu--collapse {
     height: 100%;
   }
+}
+.iconfont{
+  font-size: 20px;
+  margin-right: 5px;
 }
 </style>

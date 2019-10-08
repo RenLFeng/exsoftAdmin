@@ -51,7 +51,7 @@
         <el-form-item label="班课名:" prop="name">
           <el-input v-model="banKe.name" placeholder="班课名"></el-input>
         </el-form-item>
-          <el-form-item label="任课教师:" prop="useraccount">
+        <el-form-item label="任课教师:" prop="useraccount">
           <el-input v-model="banKe.useraccount" placeholder="教师名"></el-input>
         </el-form-item>
       </el-form>
@@ -105,12 +105,14 @@ export default {
       dialogFormVisible: false,
       banKe: {
         name: "",
-        useraccount:""
+        useraccount: ""
       },
       roleType: roleType,
       openForm: 0,
       rules: {
-        useraccount: [{ required: true, message: "请输入教师名", trigger: "blur" }],
+        useraccount: [
+          { required: true, message: "请输入教师名", trigger: "blur" }
+        ],
         name: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
@@ -176,33 +178,35 @@ export default {
       this.$http
         .post("/api/admin/bankequery", data)
         .then(res => {
-          if (res.data.code == 0 && res.data.data.data.length) {
-            this.listData = res.data.data.data;
-            console.log(res);
-            for (let v of res.data.data.users) {
-              for (let i of this.listData) {
-                if (v.id == i.userid) {
-                  i.teacher = v.account;
+          if (res.data.code == 0) {
+            if (res.data.data.data.length) {
+              this.listData = res.data.data.data;
+              console.log(res);
+              for (let v of res.data.data.users) {
+                for (let i of this.listData) {
+                  if (v.id == i.userid) {
+                    i.teacher = v.account;
+                  }
                 }
               }
+              // console.log("userquery", this.listData);
+              this.$message({
+                type: "success",
+                message: "加载成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
             }
-            // console.log("userquery", this.listData);
-            this.$message({
-              type: "success",
-              message: "加载成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "加载失败"
-            });
           }
         })
         .catch(res => {
           console.log("res");
           this.$message({
             type: "error",
-            message: 'error'
+            message: "error"
           });
         });
     },
@@ -265,7 +269,7 @@ export default {
             .catch(res => {
               this.$message({
                 type: "error",
-                message: 'error'
+                message: "error"
               });
             });
         })
@@ -291,7 +295,7 @@ export default {
     init() {
       this.banKe = {
         name: "",
-        useraccount:""
+        useraccount: ""
       };
     },
     bankeAdd(data) {
@@ -314,16 +318,24 @@ export default {
             });
             this.init();
           } else {
-           let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
-            this.$message({
-              type: "error",
-              message: data ? "导入失败" : this.openFormStateText + "失败"
-            });
-            this.$alert("<div><p>请查看是否重复账户</p><p>发现如一下问题:"+errMsg+"</p></div>", data ? "导入失败" : this.openFormStateText + "失败", {
-              confirmButtonText: "确定",
-              center: true,
-               dangerouslyUseHTMLString: true
-            });
+            if (res.data.data.errmsg.includes("1062")) {
+              let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+              this.$message({
+                type: "error",
+                message: data ? "导入失败" : this.openFormStateText + "失败"
+              });
+              this.$alert(
+                "<div><p>请查看是否重复账户</p><p>发现如一下问题:" +
+                  errMsg +
+                  "</p></div>",
+                data ? "导入失败" : this.openFormStateText + "失败",
+                {
+                  confirmButtonText: "确定",
+                  center: true,
+                  dangerouslyUseHTMLString: true
+                }
+              );
+            }
           }
         })
         .catch(res => {

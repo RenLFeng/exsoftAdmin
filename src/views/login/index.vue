@@ -72,15 +72,32 @@ export default {
               password: this.ruleForm2.password
             })
             .then(res => {
-              console.log("成功", res);
-              this.$store.commit("SETLOGINUSER", res.data.data);
-              this.$store.commit("COMMIT_TOKEN", res.data.data.id);
-              this.$router.push({
-                path: "/"
-              });
+              if (res.data.code == "0") {
+                if (res.data.data.role == '100') {
+                  console.log("成功", res);
+                  this.$store.commit("SETLOGINUSER", res.data.data);
+                  this.$store.commit("COMMIT_TOKEN", res.data.data.id);
+                  this.$router.push({
+                    path: "/"
+                  });
+                } else {
+                  this.$message({
+                    type: "error",
+                    message: "抱歉，当前账号未授权登录，请联系您的管理员"
+                  });
+                }
+              } else {
+                this.$message({
+                  type: "info",
+                  message: "登录失败"
+                });
+              }
             })
             .catch(res => {
-              console.log("失败", res);
+             this.$message({
+                  type: "error",
+                  message: "异常"
+                });
             });
         } else {
           return false;

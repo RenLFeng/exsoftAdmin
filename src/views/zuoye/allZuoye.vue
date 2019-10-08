@@ -106,33 +106,35 @@ export default {
       this.$http
         .post("/api/admin/zuoyequery", {})
         .then(res => {
-          if (res.data.code == 0 && res.data.data.data.length) {
-            this.listData = res.data.data.data;
-            for (let i of res.data.data.bankes) {
-              for (let v of this.listData) {
-                if (i.id == v.id) {
-                  v.bankename = i.name;
+          if (res.data.code == 0) {
+            if (res.data.data.data.length) {
+              this.listData = res.data.data.data;
+              for (let i of res.data.data.bankes) {
+                for (let v of this.listData) {
+                  if (i.id == v.id) {
+                    v.bankename = i.name;
+                  }
                 }
               }
-            }
-            for (let v of res.data.data.details) {
-              for (let i of this.listData) {
-                if (v.id == i.ztypeid) {
-                  i.files = JSON.parse(v.files);
+              for (let v of res.data.data.details) {
+                for (let i of this.listData) {
+                  if (v.id == i.ztypeid) {
+                    i.files = JSON.parse(v.files);
+                  }
                 }
               }
+              filter(this.listData);
+              console.log("userquery", res);
+              this.$message({
+                type: "success",
+                message: "加载成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
             }
-            filter(this.listData);
-            console.log("userquery", res);
-            this.$message({
-              type: "success",
-              message: "加载成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "加载失败"
-            });
           }
         })
         .catch(res => {

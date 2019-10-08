@@ -138,9 +138,9 @@ export default {
         ],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }]
       },
-      ExportDataState: false,
+      ExportDataState: true,
       ExportFileName: "表格",
-      tHead: userTableHead2,
+      tHead: userTableHead,
       seachData: {}
     };
   },
@@ -215,18 +215,20 @@ export default {
         .post("/api/admin/userquery", data)
         .then(res => {
           if (res.data.code == 0) {
-            console.log("userquery", res);
-            this.allUserData = res.data.data.data;
-            filter(this.allUserData);
-            this.$message({
-              type: "success",
-              message: "获取用户数据成功"
-            });
-          } else {
-            this.$message({
-              type: "info",
-              message: "获取用户数据失败"
-            });
+            if (res.data.data.data.length) {
+              console.log("userquery", res);
+              this.allUserData = res.data.data.data;
+              filter(this.allUserData);
+              this.$message({
+                type: "success",
+                message: "获取用户数据成功"
+              });
+            } else {
+              this.$message({
+                type: "info",
+                message: "暂无数据"
+              });
+            }
           }
         })
         .catch(res => {
@@ -340,16 +342,24 @@ export default {
             });
             this.init();
           } else {
-            let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
-            this.$message({
-              type: "error",
-              message: data ? "导入失败" : this.openFormStateText + "失败"
-            });
-            this.$alert("<div><p>请查看是否重复账户</p><p>发现如一下问题:"+errMsg+"</p></div>", data ? "导入失败" : this.openFormStateText + "失败", {
-              confirmButtonText: "确定",
-              center: true,
-               dangerouslyUseHTMLString: true
-            });
+            if (res.data.data.errmsg.includes("1062")) {
+              let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+              this.$message({
+                type: "error",
+                message: data ? "导入失败" : this.openFormStateText + "失败"
+              });
+              this.$alert(
+                "<div><p>请查看是否重复账户</p><p>发现如一下问题:" +
+                  errMsg +
+                  "</p></div>",
+                data ? "导入失败" : this.openFormStateText + "失败",
+                {
+                  confirmButtonText: "确定",
+                  center: true,
+                  dangerouslyUseHTMLString: true
+                }
+              );
+            }
           }
         })
         .catch(res => {
