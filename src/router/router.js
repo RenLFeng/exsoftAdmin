@@ -137,7 +137,6 @@ myRouter.beforeEach((to,from,next)=>{
   }else{
     next()
   }
-  // next()
 })
 myRouter.afterEach(() => {
   NProgress.done() 
