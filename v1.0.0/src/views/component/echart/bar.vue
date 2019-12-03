@@ -59,8 +59,8 @@ export default {
             magicType: { show: true, type: ["line", "bar"] },
             restore: { show: true },
             saveAsImage: { show: true }
-          }
-          // orient: "vertical"
+          },
+          orient: "vertical"
         },
         legend: {
           data: this.echartData.legend.data
