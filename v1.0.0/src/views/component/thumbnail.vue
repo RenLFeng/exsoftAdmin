@@ -4,7 +4,7 @@
       <div v-for="(v,i) in items" :key="i" class="item">
         <el-col :lg="6" :md="8" :sm="8" :xs="12" class="item-col" @click.native="onclick(v)">
           <div class="item-warp">
-            <img class="item-img" :src="'http://192.168.0.2:81'+v.avatar" alt="..." />
+            <img class="item-img" :src="v.avatar" alt="..." />
             <div class="caption">
               <h3 class="calss-type fontsize-md ellipsis">{{v.name}}</h3>
               <p class="teacher-name fontsize-md">教师:{{v.teacherName}}</p>
@@ -48,35 +48,23 @@ export default {
   .item {
     text-align: left;
     .item-col {
-      .el-col-lg-6{
-       margin-bottom: 50px;
-      }
+      height: 430px;
       .item-warp {
+        width: 100%;
+        height: 100%;
         border: 1px solid #c7c5c5;
         box-shadow: 0 3px 8px #c7c5c5;
-
-        // position: relative;
-        // width: 100%;
-        // height: 0;
-        // padding-top: 100%;
-      }
-      .item-img {
-        width: 100%;
-        height: 200px;
-
-        // position: absolute;
-        // top: 0;
-        // left: 0;
-        // width: 100%;
-        // height: 200px;
+        .item-img {
+          width: 100%;
+          height: auto;
+          max-width: 100%;
+          max-height: 304px;
+        }
       }
       .caption {
-        // border: 1px solid #c7c5c5;
-        // box-shadow: 0 3px 8px #c7c5c5;
-        // padding: 10px;
         * {
           margin: 10px 0;
-          padding:0 10px;
+          padding: 0 10px;
         }
       }
     }
@@ -85,6 +73,7 @@ export default {
 </style>
 <style scoped>
 @media screen and (max-width: 500px) {
+  
   .item-col {
     width: 100%;
   }

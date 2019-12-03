@@ -244,8 +244,8 @@ export default {
             }
 
             this.cloudData = this.serverData.activity;
+
             this.classData = this.serverData.banke;
-            this.classData.zuoyewpercent = this.classData.zuoyewpercent / 100;
 
             let date = getDate(this.serverData.weekactivity[0].countdate);
             this.echartData.xAxis.data = date;
