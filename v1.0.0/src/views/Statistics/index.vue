@@ -45,7 +45,7 @@ export default {
                 this.listData[v].list = [];
                 for (let i = 0; i < res.data.data.data.length; i++) {
                   if (this.listData[v].id == res.data.data.data[i].userid) {
-                    res.data.data.data[i].teacherName=this.listData[v].account
+                    res.data.data.data[i].teacherName=this.listData[v].name
                     this.listData[v].list.push(res.data.data.data[i]);
                     
                   }

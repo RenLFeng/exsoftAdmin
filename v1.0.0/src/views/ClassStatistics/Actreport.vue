@@ -38,6 +38,7 @@
           <div class="chart-tit fontsize-sm" style="border-bottom:none">签到率排名Top5</div>
           <el-table :data="SigntableData" border>
             <el-table-column prop="name" label="姓名" width="200"></el-table-column>
+            <el-table-column prop="signnum" label="签到次数" width="180"></el-table-column>
             <el-table-column prop="sign" label="签到率"></el-table-column>
           </el-table>
         </el-col>
@@ -55,7 +56,7 @@ import Pie from "../component/echart/pie";
 import Bar from "../component/echart/line";
 import Eline from "../component/echart/line";
 import "./style/common.scss";
-import { getDate, nowDate } from "../../util";
+import { getDate, parseChartScoreData,getChartDate, nowDate } from "../../util";
 import { mapState } from "vuex";
 //班课文件： finttype 标志其文件类型：
 // #define FILETYPE_UNKOWN 0
@@ -189,17 +190,23 @@ const echartElineData = {
     {
       name: "最高分",
       type: "line",
-      data: [0, 0, 0, 0, 0, 0, 0]
+      data: [0, 0, 0, 0, 0, 0, 0],
+        matchcol:'score3',
+        matchuserid:3
     },
     {
       name: "最低分",
       type: "line",
-      data: [0, 0, 0, 0, 0, 0, 0]
+      data: [0, 0, 0, 0, 0, 0, 0],
+        matchcol:'score3',
+        matchuserid:2,
     },
     {
       name: "平均分",
       type: "line",
-      data: [0, 0, 0, 0, 0, 0, 0]
+      data: [0, 0, 0, 0, 0, 0, 0],
+        matchcol:'score3',
+        matchuserid:1
     }
   ]
 };
@@ -237,13 +244,14 @@ export default {
           text: "活动类型分布"
         },
         legend: {
-          data: ["作业", "签到", "资源"]
+          data: ["作业", "签到", "资源", "评测"]
         },
         series: {
           data: [
-            { value: 0, name: "作业" },
-            { value: 0, name: "签到" },
-            { value: 0, name: "资源" }
+            { value: 0, name: "作业" , matchcol:'zuoyenum'},
+            { value: 0, name: "签到", matchcol:'signnum' },
+            { value: 0, name: "资源" , matchcol:'filesnum'},
+              {value:0, name:"评测", matchcol:'pingcenum'}
           ]
         }
       },
@@ -294,34 +302,46 @@ export default {
             console.log("this.serverData", this.serverData);
 
             //活动个构成
-            for (let v in this.serverData.numinfo) {
-              switch (v) {
-                case "filesnum":
-                  for (let item of this.echartData.series.data) {
-                    if (item.name == "资源") {
-                      item.value = this.serverData.numinfo[v];
-                    
-                    }
+              let numinfo = this.serverData.numinfo;
+              for(let item of this.echartData.series.data){
+                  if (typeof numinfo[item.matchcol] != 'undefined'){
+                      item.value = numinfo[item.matchcol];
                   }
-                  break;
-                case "signnum":
-                  for (let item of this.echartData.series.data) {
-                    if (item.name == "签到") {
-                      item.value = this.serverData.numinfo[v];
-                     
-                    }
+                  else{
+                      item.value = 0;
                   }
-                  break;
-                case "zuoyenum":
-                  for (let item of this.echartData.series.data) {
-                    if (item.name == "作业") {
-                      item.value = this.serverData.numinfo[v];
-                   
-                    }
-                  }
-                  break;
               }
-            }
+            //for (let v in this.serverData.numinfo) {
+
+
+
+              // switch (v) {
+              //   case "filesnum":
+              //     for (let item of this.echartData.series.data) {
+              //       if (item.name == "资源") {
+              //         item.value = this.serverData.numinfo[v];
+              //
+              //       }
+              //     }
+              //     break;
+              //   case "signnum":
+              //     for (let item of this.echartData.series.data) {
+              //       if (item.name == "签到") {
+              //         item.value = this.serverData.numinfo[v];
+              //
+              //       }
+              //     }
+              //     break;
+              //   case "zuoyenum":
+              //     for (let item of this.echartData.series.data) {
+              //       if (item.name == "作业") {
+              //         item.value = this.serverData.numinfo[v];
+              //
+              //       }
+              //     }
+              //     break;
+              // }
+           // }
             //活动参与度
             for (let i = 0; i < this.serverData.actjoin.length; i++) {
               let item = this.serverData.actjoin[i];
@@ -358,84 +378,113 @@ export default {
             }
             this.echartBarData = echartBarData;
             // console.log("this.echartBarData", this.echartBarData);
+              this.echartElineData = echartElineData;
+              parseChartScoreData(this.echartElineData, this.serverData.weekactivity, 7, null);
             //作业报表
-            let date = getDate(
-              this.serverData.weekactivity[
-                this.serverData.weekactivity.length - 1
-              ].countdate
-            );
-            echartElineData.xAxis.data = date;
-            for (let i = 0; i < this.serverData.weekactivity.length; i++) {
-              for (let j = 0; j < echartElineData.xAxis.data.length; j++) {
-                if (
-                  this.serverData.weekactivity[i].countdate ==
-                  echartElineData.xAxis.data[j]
-                ) {
-                  this.serverData.weekactivity[i].index = j;
-                }
-              }
-              let item = this.serverData.weekactivity[i];
-              // for (let key in item) {
-              switch (item.userid) {
-                case 1:
-                  for (let v of echartElineData.series) {
-                    if (v.name == "平均分") {
-                      v.data[item.index] = item.score3;
-                    }
-                  }
-                  break;
-                case 2:
-                  for (let v of echartElineData.series) {
-                    if (v.name == "最低分") {
-                      v.data[item.index] = item.score3;
-                    }
-                  }
-                  break;
-                case 3:
-                  for (let v of echartElineData.series) {
-                    if (v.name == "最高分") {
-                      v.data[item.index] = item.score3;
-                    }
-                  }
-                  break;
-              }
-              // }
-            }
-            this.echartElineData = echartElineData;
+            // let date = getDate(
+            //   this.serverData.weekactivity[
+            //     this.serverData.weekactivity.length - 1
+            //   ].countdate
+            // );
+            // echartElineData.xAxis.data = date;
+            // for (let i = 0; i < this.serverData.weekactivity.length; i++) {
+            //   for (let j = 0; j < echartElineData.xAxis.data.length; j++) {
+            //     if (
+            //       this.serverData.weekactivity[i].countdate ==
+            //       echartElineData.xAxis.data[j]
+            //     ) {
+            //       this.serverData.weekactivity[i].index = j;
+            //     }
+            //   }
+            //   let item = this.serverData.weekactivity[i];
+            //   // for (let key in item) {
+            //   switch (item.userid) {
+            //     case 1:
+            //       for (let v of echartElineData.series) {
+            //         if (v.name == "平均分") {
+            //           v.data[item.index] = item.score3;
+            //         }
+            //       }
+            //       break;
+            //     case 2:
+            //       for (let v of echartElineData.series) {
+            //         if (v.name == "最低分") {
+            //           v.data[item.index] = item.score3;
+            //         }
+            //       }
+            //       break;
+            //     case 3:
+            //       for (let v of echartElineData.series) {
+            //         if (v.name == "最高分") {
+            //           v.data[item.index] = item.score3;
+            //         }
+            //       }
+            //       break;
+            //   }
+            //   // }
+            // }
+            // this.echartElineData = echartElineData;
             // console.log("this.echartElineData", this.echartElineData);
 
             //历次作业平均分Top5
             for (let v of this.serverData.zuoyescores) {
               this.tableData.push({
-                name: v.userid,
+                name: v.username,
                 ParticipationTimes: v.num,
                 Average: v.avgscore
               });
             }
             //签到报表
-            let weeksignDate = getDate(this.serverData.weeksign[0].countdate);
+            let weeksignDate = getChartDate(7, null); //getDate(this.serverData.weeksign[0].countdate);
             echartLineSignData.xAxis.data = weeksignDate;
-            for (let i = 0; i < this.serverData.weeksign.length; i++) {
-              let item = this.serverData.weeksign[i];
-              for (let j = 0; j < echartLineSignData.xAxis.data.length; j++) {
-                if (
-                  this.serverData.weeksign[i].countdate ==
-                  echartLineSignData.xAxis.data[j]
-                ) {
-                  this.serverData.weeksign[i].index = j;
-                }
+
+            let ed = echartLineSignData;
+              for (let v of ed.series){
+                  v.data = [];
               }
-              echartLineSignData.series[0].data[item.index] =
-                (item.joinwpercent / 10000) * 100;
+            let wa = this.serverData.weeksign;
+            for(let i=0; i<weeksignDate.length; i++){
+                let cur = null;
+                for(let j=0; j<wa.length; j++){
+                    if (wa[j].countdate == weeksignDate[i]){
+                        cur = wa[j];
+                    }
+                }
+                for(let v of ed.series){
+                    if (cur){
+                        v.data.push(cur.joinwpercent/100);
+                    }
+                    else{
+                        v.data.push(0);
+                    }
+                }
             }
+            // for (let i = 0; i < this.serverData.weeksign.length; i++) {
+            //   let item = this.serverData.weeksign[i];
+            //   for (let j = 0; j < echartLineSignData.xAxis.data.length; j++) {
+            //     if (
+            //       this.serverData.weeksign[i].countdate ==
+            //       echartLineSignData.xAxis.data[j]
+            //     ) {
+            //       this.serverData.weeksign[i].index = j;
+            //     }
+            //   }
+            //   echartLineSignData.series[0].data[item.index] =
+            //     (item.joinwpercent / 10000) * 100;
+            // }
             this.echartLineSignData = echartLineSignData;
             // console.log("this.echartLineSignData", this.echartLineSignData);
 
             //签到率排名Top5
+              let signtotal = this.serverData.numinfo.signnum;
+              if (signtotal <= 0){
+                  signtotal = 1;
+              }
             for (let v of this.serverData.signjoinnums) {
               this.SigntableData.push({
-                name: v.userid,
-                sign: v.signnum
+                name: v.username,
+                  signnum:v.signnum,
+                sign: v.signnum * 100 / signtotal + '%'
               });
             }
             // console.log("this.echartLineSignData", this.echartLineSignData);

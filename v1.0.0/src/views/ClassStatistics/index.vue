@@ -41,7 +41,7 @@ import Header2 from "../layout/components/Header2";
 import Footer from "../layout/components/footer";
 import Title from "./common/header";
 import Bar from "../component/echart/bar";
-import { getDate, nowDate, parseURL } from "../../util";
+import { getDate, nowDate, parseChartWeekData, parseURL } from "../../util";
 import { mapState } from "vuex";
 import "./style/common.scss";
 const classList = [
@@ -89,10 +89,12 @@ export default {
           data: [
             "新增资源",
             "新增活动",
-            "签到次数",
+            "新增签到",
+              "新增评测",
             "资源总数",
             "活动总数",
-            "签到总数"
+            "签到总数",
+              "评测总数",
           ]
         },
         xAxis: {
@@ -102,33 +104,55 @@ export default {
           {
             name: "新增资源",
             type: "bar",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0],
+              matchcol:'score1'
           },
           {
             name: "新增活动",
             type: "bar",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0],
+              matchcol:'score3'
           },
           {
-            name: "签到次数",
-            type: "bar",
-            data: [0, 0, 0, 0, 0, 0, 0]
-          },
+                name: "新增签到",
+                type: "bar",
+                data: [0, 0, 0, 0, 0, 0, 0],
+                matchcol:'score2'
+            },
+            {
+                name: "新增评测",
+                type: "bar",
+                data: [0, 0, 0, 0, 0, 0, 0],
+                matchcol:'score4'
+            },
           {
             name: "资源总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0],
+              matchcol:'score1',
+              isadd:1
           },
           {
             name: "活动总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0],
+              isadd:1,
+              matchcol:'score3'
           },
           {
             name: "签到总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
-          }
+            data: [0, 0, 0, 0, 0, 0, 0],
+              isadd:1,
+              matchcol:'score2'
+          },
+            {
+                name: "评测总数",
+                type: "line",
+                data: [0, 0, 0, 0, 0, 0, 0],
+                isadd:1,
+                matchcol:'score4'
+            }
         ]
       },
 
@@ -171,7 +195,7 @@ export default {
             this.serverData = res.data.data;
             this.classTitInfo = {
               name: this.serverData.banke.name,
-              teacherName: this.serverData.banke.userid
+              teacherName: this.serverData.banke.username
             };
             this.$store.commit("SET_CLASS_TITLE_INFO", this.classTitInfo);
             this.istrue = true;
@@ -185,69 +209,74 @@ export default {
                 }
               }
             }
+
+
+           // this.parseChartData(this.serverData.weekactivity);
+              parseChartWeekData(this.echartData, this.serverData.weekactivity, 7, null);
+
             // console.log('this.classList',this.classList)
-            if (this.serverData.weekactivity.length) {
-              let date = getDate(this.serverData.weekactivity[0].countdate);
-              this.echartData.xAxis.data = date;
-              for (
-                let i = this.serverData.weekactivity.length - 1;
-                i >= 0;
-                i--
-              ) {
-                for (let j = 0; j < this.echartData.xAxis.data.length; j++) {
-                  if (
-                    this.serverData.weekactivity[i].countdate ==
-                    this.echartData.xAxis.data[j]
-                  ) {
-                    this.serverData.weekactivity[i].index = j;
-                  }
-                }
-                let item = this.serverData.weekactivity[i];
-                for (let key in item) {
-                  switch (key) {
-                    case "score1":
-                      for (let v of this.echartData.series) {
-                        if (v.name == "新增资源") {
-                          v.data[item.index] = item[key];
-                        }
-                        if (v.name == "资源总数") {
-                          let temp = item[key];
-                          this.rerepTotal = this.rerepTotal + temp;
-                          v.data[item.index] = this.rerepTotal;
-                          v.data[item.index + 1] = this.rerepTotal;
-                        }
-                      }
-                      break;
-                    case "score2":
-                      for (let v of this.echartData.series) {
-                        if (v.name == "新增活动") {
-                          v.data[item.index] = item[key];
-                        }
-                        if (v.name == "活动总数") {
-                          let temp = item[key];
-                          this.activTotal = this.activTotal + temp;
-                          v.data[item.index] = this.activTotal;
-                          v.data[item.index + 1] = this.activTotal;
-                        }
-                      }
-                      break;
-                    case "score3":
-                      for (let v of this.echartData.series) {
-                        if (v.name == "签到次数") {
-                          v.data[item.index] = item[key];
-                        }
-                        if (v.name == "签到总数") {
-                          let temp = item[key];
-                          this.signTotal = this.signTotal + temp;
-                          v.data[item.index] = this.signTotal;
-                          v.data[item.index + 1] = this.signTotal;
-                        }
-                      }
-                      break;
-                  }
-                }
-              }
-            }
+            // if (this.serverData.weekactivity.length) {
+            //   let date = getDate(this.serverData.weekactivity[0].countdate);
+            //   this.echartData.xAxis.data = date;
+            //   for (
+            //     let i = this.serverData.weekactivity.length - 1;
+            //     i >= 0;
+            //     i--
+            //   ) {
+            //     for (let j = 0; j < this.echartData.xAxis.data.length; j++) {
+            //       if (
+            //         this.serverData.weekactivity[i].countdate ==
+            //         this.echartData.xAxis.data[j]
+            //       ) {
+            //         this.serverData.weekactivity[i].index = j;
+            //       }
+            //     }
+            //     let item = this.serverData.weekactivity[i];
+            //     for (let key in item) {
+            //       switch (key) {
+            //         case "score1":
+            //           for (let v of this.echartData.series) {
+            //             if (v.name == "新增资源") {
+            //               v.data[item.index] = item[key];
+            //             }
+            //             if (v.name == "资源总数") {
+            //               let temp = item[key];
+            //               this.rerepTotal = this.rerepTotal + temp;
+            //               v.data[item.index] = this.rerepTotal;
+            //               v.data[item.index + 1] = this.rerepTotal;
+            //             }
+            //           }
+            //           break;
+            //         case "score2":
+            //           for (let v of this.echartData.series) {
+            //             if (v.name == "新增活动") {
+            //               v.data[item.index] = item[key];
+            //             }
+            //             if (v.name == "活动总数") {
+            //               let temp = item[key];
+            //               this.activTotal = this.activTotal + temp;
+            //               v.data[item.index] = this.activTotal;
+            //               v.data[item.index + 1] = this.activTotal;
+            //             }
+            //           }
+            //           break;
+            //         case "score3":
+            //           for (let v of this.echartData.series) {
+            //             if (v.name == "签到次数") {
+            //               v.data[item.index] = item[key];
+            //             }
+            //             if (v.name == "签到总数") {
+            //               let temp = item[key];
+            //               this.signTotal = this.signTotal + temp;
+            //               v.data[item.index] = this.signTotal;
+            //               v.data[item.index + 1] = this.signTotal;
+            //             }
+            //           }
+            //           break;
+            //       }
+            //     }
+            //   }
+            // }
             this.activTotal = 0;
             this.rerepTotal = 0;
             this.signTotal = 0;

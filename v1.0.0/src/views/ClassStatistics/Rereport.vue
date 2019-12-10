@@ -55,7 +55,7 @@ import Bar from "../component/echart/bar";
 import Eline from "../component/echart/line";
 import { mapState } from "vuex";
 import "./style/common.scss";
-import { getDate, nowDate, getFileType } from "../../util";
+import { getDate, nowDate,parseChartScoreData, getFileType } from "../../util";
 const times = [];
 for (let i = 0; i < 24; i++) {
   times.push(`${i}点-${i + 1}点`);
@@ -289,7 +289,7 @@ export default {
             // 资源学习Top5
             for (let v of this.Resourcelearning.members) {
               this.tableData.push({
-                name: v.account,
+                name: v.name,
                 score: v.score1,
                 Percentage:
                   ((v.score1 / this.ResourceTatol) * 100).toFixed(2) + "%"
@@ -310,14 +310,31 @@ export default {
     //资源查阅时间分布
     getQueryTimeCount() {
       this.$http
-        .post("/api/bankefile/querytimecount", { id: this.ClassID })
+        .post("/api/bankefile/querytimecount", { classid: this.ClassID })
         .then(res => {
           // console.log("success", res);
           if (res.data.code == "0") {
-            for (let key in this.querytimecount) {
-              let index = key.split("time")[1];
-              echartLineData.series[0].data[index] = this.querytimecount[key];
-            }
+              if (res.data.data ){
+                  this.querytimecount = res.data.data;
+              }
+            // for (let key in this.querytimecount) {
+            //   let index = key.split("time")[1];
+            //   echartLineData.series[0].data[index] = this.querytimecount[key];
+            // }
+              let ed = [];
+              let qt = this.querytimecount;
+           //   console.log(qt);
+              for(let i=0; i<24; i++){
+                  //ed.push(1);
+                  let szkey = 'time' + i;
+                  if (typeof qt[szkey] != 'undefined'){
+                      ed.push(Number(qt[szkey]));
+                  }
+                  else{
+                      ed.push(0);
+                  }
+              }
+              echartLineData.series[0].data = ed;
             this.echartLineData = echartLineData;
 
             // console.log("this.echartLineData", this.echartLineData);

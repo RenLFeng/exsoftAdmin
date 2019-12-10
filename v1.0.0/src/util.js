@@ -48,6 +48,143 @@ export const getDate = (date) => {
 
 }
 
+//! cjy: 得到图表数据的日期; 需要占位符，不足0补0， 如 2019/12/01
+export const getChartDate = (ndays, date)=>{
+   let enddate = date? new Date(date): new Date(); //!  new Date为本地时区 China Standard Time
+   //console.log(enddate);
+   let dates = [];
+   let basetime = new Date(enddate).getTime();
+   let oneday = 24 * 3600 * 1000;
+   for(let i=0; i<=ndays; i++){
+     let cur = new Date(basetime);
+     //console.log(cur);
+     basetime -= oneday;
+     let m = cur.getMonth() + 1;
+     let d = cur.getDate();
+     let dayarray = [cur.getFullYear()+'', m<10? '0'+m:''+m,
+         d<10?'0'+d:''+d];
+     dates.push(dayarray.join('/'));
+   }
+   return dates.reverse();
+}
+
+//! cjy: 分许得分情况
+export const parseChartScoreData = (ed, wa, days, enddate)=>{
+    //! 清空原数据
+    ed.xAxis.data = [];
+    for (let v of ed.series){
+        v.data = [];
+    }
+
+    let datearray = getChartDate(days, enddate);
+    ed.xAxis.data = datearray;
+    //! 首先对原数据进行按日期归类整理
+    let scoredatas = {};
+    for(let i=0; i<wa.length; i++){
+      let cdate = wa[i].countdate;
+      if (typeof scoredatas[cdate] == 'undefined'){
+        scoredatas[cdate] = [];
+      }
+      scoredatas[cdate].push(wa[i]);
+    }
+    //console.log(scoredatas);
+    for(let i = 0; i<datearray.length; i++){
+      let scoredata = null;
+      {
+        if (scoredatas[datearray[i]]){
+          scoredata = scoredatas[datearray[i]];
+        }
+      }
+
+      if (!scoredata){
+        scoredata = [];
+      }
+      for (let v of ed.series){
+        let curdata = 0;
+        let usescore = null;
+        //console.log(v.matchuserid);
+        if (v.matchuserid){
+          //for(let us of scoredata)
+            for(let j=0; j<scoredata.length; j++)
+          {
+            let us = scoredata[j];
+          //  console.log(us);
+            if (us.userid == v.matchuserid){
+              usescore = us;
+              break;
+            }
+          }
+        }
+        else{
+          if (scoredata.length){
+            usescore = scoredata[0];
+          }
+        }
+        //console.log(usescore);
+        if (usescore){
+            if(v.matchcol){
+                if (typeof usescore[v.matchcol] != 'undefined'){
+                    curdata = Number(usescore[v.matchcol]);
+                }
+            }
+        }
+        v.data.push(curdata);
+      }
+    }
+}
+
+//! cjy: 分析周报数据
+export const parseChartWeekData = (ed, wa, days, enddate)=>{
+
+   //! 清空原数据
+    ed.xAxis.data = [];
+    for (let v of ed.series){
+      v.data = [];
+    }
+
+    let datearray = getChartDate(days, enddate);
+    //console.log(datearray);
+    ed.xAxis.data = datearray;
+    let adddata = {};
+    for(let i=0; i<datearray.length; i++){
+        let scoredata = null;
+        for(let j=0; j<wa.length; j++){
+            if (wa[j].countdate == datearray[i]){
+                scoredata = wa[j];
+                //! 删除，减少下次遍历的循环次数
+                wa.splice(j, 1);
+                break;
+            }
+        }
+        if (!scoredata){
+            scoredata = {};
+        }
+        for (let v of ed.series){
+            let curdata = 0;
+
+            if (v.matchcol){
+                let usedata = 0;
+                if (typeof scoredata[v.matchcol] != 'undefined'){
+                    usedata = Number(scoredata[v.matchcol]);
+                }
+                if (v.isadd){
+                    if (typeof adddata[v.matchcol] == 'undefined'){
+                        adddata[v.matchcol] = 0;
+                    }
+                    adddata[v.matchcol] += (usedata);
+                    curdata = adddata[v.matchcol];
+                }
+                else{
+                    curdata = usedata;
+                }
+            }
+            v.data.push(curdata);
+        }
+
+    }
+}
+
+
 export const getFileType = (v) => {
   const arr = [{
       id: 0,

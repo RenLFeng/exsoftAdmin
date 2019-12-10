@@ -5,6 +5,12 @@
       <Title />
       <el-row class="content-charts" :gutter="40">
         <el-col>
+          <div class="chart-tit fontsize-sm">{{scoreruledesc}}</div>
+
+        </el-col>
+      </el-row>
+      <el-row class="content-charts" :gutter="40">
+        <el-col>
           <div class="chart-tit fontsize-sm">得分情况分布</div>
           <Pie :data="echartDataP1" :label="1" />
         </el-col>
@@ -111,10 +117,10 @@ const echartDataP2 = {
   },
   series: {
     data: [
-      { value: 0, name: "作业", type: "score1" },
-      { value: 0, name: "评测", type: "score2" },
-      { value: 0, name: "签到", type: "score3" },
-      { value: 0, name: "资源学习", type: "score4" }
+      { value: 0, name: "作业", type: "score3" },
+      { value: 0, name: "评测", type: "score4" },
+      { value: 0, name: "签到", type: "score2" },
+      { value: 0, name: "资源学习", type: "score1" }
     ]
   }
 };
@@ -158,7 +164,10 @@ export default {
 
       DetailedTable: [],
       Resourcelearning: {},
-      index: 0
+      index: 0,
+
+        bankedata:{},
+        scoreruledesc:''
     };
   },
     computed: {
@@ -166,15 +175,16 @@ export default {
       },
   mounted() {
     this.$http
-      .post("/api/bankecount/actreport", { id: this.ClassID })
+      .post("/api/bankecount/xueqing", { id: this.ClassID })
       .then(res => {
         if (res.data.code == "0") {
-          this.allScorerule =
-            res.data.data.banke.scorerule1 +
-            res.data.data.banke.scorerule2 +
-            res.data.data.banke.scorerule3 +
-            res.data.data.banke.scorerule4 +
-            res.data.data.banke.scorerule5;
+          // this.allScorerule =
+          //   res.data.data.banke.scorerule1 +
+          //   res.data.data.banke.scorerule2 +
+          //   res.data.data.banke.scorerule3 +
+          //   res.data.data.banke.scorerule4 +
+          //   res.data.data.banke.scorerule5;
+            this.bankedata = res.data.data.banke;
           this.getResourcelearning();
         } else {
         }
@@ -189,70 +199,134 @@ export default {
         .then(res => {
           // console.log("success", res);
           if (res.data.code == "0") {
+
             this.Resourcelearning = res.data.data;
             // this.Resourcelearning.members =members
+              let banke = this.bankedata;
+              let mnum = this.Resourcelearning.members.length;
+              if (mnum <= 0){ //! 防止除0错误
+                  mnum = 1;
+              }
+              let ruledesc = '得分占比：';
+              ruledesc += ' 资源(' + banke.scorerule1 + '%)';
+              ruledesc += ' 签到(' + banke.scorerule2 + '%)';
+              ruledesc += ' 作业(' + banke.scorerule3 + '%)';
+              ruledesc += ' 评测(' + banke.scorerule4 + '%)';
+              this.scoreruledesc = ruledesc;
+              let members = this.Resourcelearning.members;
+
+              //! 各项的最高分； 用于雷达图
+              let maxperscore = {
+                  score1:0,
+                  score2:0,
+                  score3:0,
+                  score4:0
+              }
+              let countcols = ['score1', 'score2', 'score3', 'score4'];
+              //! cjy: 重置数据； tab切换并不会重新初始化
+              this.ALLTotal = 0;
+              this.AllTotalscore1 = this.AllTotalscore2 = this.AllTotalscore3 = this.AllTotalscore4 = 0;
             for (let v of this.Resourcelearning.members) {
               let studentScore =
-                v.score1 + v.score2 + v.score3 + v.score4 + v.score5;
+               // v.score1 + v.score2 + v.score3 + v.score4 + v.score5;
+            v.score1 * banke.scorerule1 / 100 + v.score2 * banke.scorerule2 / 100
+                + v.score3 * banke.scorerule3 /100  + v.score4 *banke.scorerule4 / 100;
               v.studentScore = studentScore;
-              this.ALLTotal = studentScore + this.ALLTotal;
-              this.AllTotalscore1 = v.score1 + this.AllTotalscore1;
-              this.AllTotalscore2 = v.score2 + this.AllTotalscore2;
-              this.AllTotalscore3 = v.score3 + this.AllTotalscore3;
-              this.AllTotalscore4 = v.score4 + this.AllTotalscore4;
-              this.AllTotalscore5 = v.score5 + this.AllTotalscore5;
-
-              let total = v.score1 + v.score2 + v.score3 + v.score4 + v.score5;
-              let ratio = (total / this.allScorerule) * 100;
-              if (ratio < 60 && ratio > 0) {
-                for (let item of echartDataP1.series.data) {
-                  if (item.name == "入门") {
-                    item.value++;
+              this.ALLTotal += studentScore ;
+              this.AllTotalscore1 += v.score1 ;
+              this.AllTotalscore2 += v.score2 ;
+              this.AllTotalscore3 += v.score3 ;
+              this.AllTotalscore4 += v.score4 ;
+              this.AllTotalscore5 += v.score5 ;
+              for(let ps of countcols){
+                  if (v[ps] > maxperscore[ps]){
+                      maxperscore[ps] = v[ps];
                   }
-                }
-              } else if (ratio >= 60 && ratio < 80) {
-                for (let item of echartDataP1.series.data) {
-                  if (item.name == "及格") {
-                    item.value++;
-                  }
-                }
-              } else if (ratio >= 80) {
-                for (let item of echartDataP1.series.data) {
-                  if (item.name == "优秀") {
-                    item.value++;
-                  }
-                }
               }
+
+              // let total = v.score1 + v.score2 + v.score3 + v.score4 + v.score5;
+              // let ratio = (total / this.allScorerule) * 100;
+              // if (ratio < 60 && ratio > 0) {
+              //   for (let item of echartDataP1.series.data) {
+              //     if (item.name == "入门") {
+              //       item.value++;
+              //     }
+              //   }
+              // } else if (ratio >= 60 && ratio < 80) {
+              //   for (let item of echartDataP1.series.data) {
+              //     if (item.name == "及格") {
+              //       item.value++;
+              //     }
+              //   }
+              // } else if (ratio >= 80) {
+              //   for (let item of echartDataP1.series.data) {
+              //     if (item.name == "优秀") {
+              //       item.value++;
+              //     }
+              //   }
+              // }
             }
+
+            //！ cjy ：总分得出后，统计分数占比情况： 优秀：>= 平均分*1.5 及格： >=平均分 入门： <= 平均分
+              let ed = echartDataP1; //! 优秀  及格 入门
+              let avgscore = this.ALLTotal / mnum;
+              let highscore = avgscore * 1.5;
+             // console.log(avgscore);
+              for(let v of ed.series.data){ //! 清空数据
+                  v.value = 0;
+              }
+              for(let v of members){
+                  if (v.studentScore >= highscore){
+                      ed.series.data[0].value++;
+                  }
+                  else if (v.studentScore >= avgscore){
+                      ed.series.data[1].value++;
+                  }
+                  else{
+                      ed.series.data[2].value++;
+                  }
+              }
+
             this.echartDataP1 = echartDataP1;
             //得分获得方式
-            this.totals = [
-              this.AllTotalscore1,
-              this.AllTotalscore2,
-              this.AllTotalscore3,
-              this.AllTotalscore4
-              // this.AllTotalscore5
-            ];
-            for (let key in this.totals) {
-              for (let i = 0; i < echartDataP2.series.data.length; i++) {
-                let item = echartDataP2.series.data[key];
-                switch (item.type) {
-                  case "score1":
-                    item.value = this.totals[key];
-                    break;
-                  case "score2":
-                    item.value = this.totals[key];
-                    break;
-
-                  case "score3":
-                    item.value = this.totals[key];
-                    break;
-                  case "score4":
-                    item.value = this.totals[key];
-                    break;
-                }
+            // this.totals = [
+            //   this.AllTotalscore1,
+            //   this.AllTotalscore2,
+            //   this.AllTotalscore3,
+            //   this.AllTotalscore4
+            //   // this.AllTotalscore5
+            // ];
+              let scorecols = {};
+              scorecols.score1 = this.AllTotalscore1;
+              scorecols.score2 = this.AllTotalscore2;
+              scorecols.score3 = this.AllTotalscore3;
+              scorecols.score4 = this.AllTotalscore4;
+              {
+                  let ed = echartDataP2;
+                  for(let v of ed.series.data){
+                      v.value = scorecols[v.type];
+                  }
               }
-            }
+            // for (let key in this.totals) {
+            //   for (let i = 0; i < echartDataP2.series.data.length; i++) {
+            //     let item = echartDataP2.series.data[key];
+            //     switch (item.type) {
+            //       case "score1":
+            //         item.value = this.totals[key];
+            //         break;
+            //       case "score2":
+            //         item.value = this.totals[key];
+            //         break;
+            //
+            //       case "score3":
+            //         item.value = this.totals[key];
+            //         break;
+            //       case "score4":
+            //         item.value = this.totals[key];
+            //         break;
+            //     }
+            //   }
+            // }
             this.echartDataP2 = echartDataP2;
             //*得分倒数前三  雷达图
             this.Resourcelearning.members.sort(compare("studentScore", 0)); //倒序
@@ -264,6 +338,7 @@ export default {
               this.excellent.score3,
               this.excellent.score4
             ];
+            console.log(this.excellent.data);
             //每一项 平均分值 this.AverageData
             this.score1Average =
               this.AllTotalscore1 / this.Resourcelearning.members.length;
@@ -279,6 +354,7 @@ export default {
               this.score3Average,
               this.score4Average
             ];
+              echartRadar.length = 0; //! 清空原数据
             for (
               let i = this.Resourcelearning.members.length - 1;
               i >= 0;
@@ -291,25 +367,26 @@ export default {
               let score4 = this.Resourcelearning.members[i].score4;
               //输出倒数前三学生
               let poorData = [score1, score2, score3, score4];
+
               echartRadar.push({
                 legend: {
                   data: [
-                    this.Resourcelearning.members[i].account,
+                    this.Resourcelearning.members[i].name,
                     "优秀同学",
                     "学生平均分"
                   ]
                 },
                 indicator: [
-                  { name: "资源学习" },
-                  { name: "签到" },
-                  { name: "作业" },
-                  { name: "评测" }
+                  { name: "资源学习" ,max:maxperscore.score1},
+                  { name: "签到" , max:maxperscore.score2},
+                  { name: "作业", max:maxperscore.score3 },
+                  { name: "评测" , max:maxperscore.score4}
                 ],
                 series: {
                   data: [
                     {
                       value: poorData,
-                      name: this.Resourcelearning.members[i].account
+                      name: this.Resourcelearning.members[i].name
                     },
                     {
                       value: this.excellent.data,
@@ -326,11 +403,12 @@ export default {
             }
             this.echartRadar = echartRadar;
             //得分清单
+              this.DetailedTable.length = 0;
             for (let v of this.Resourcelearning.members) {
-              let total = v.score1 + v.score2 + v.score3 + v.score4;
+            //  let total = v.score1 + v.score2 + v.score3 + v.score4;
               this.DetailedTable.push({
-                name: v.account,
-                totalScore: total,
+                name: v.name,
+                totalScore: v.studentScore,
                 ResourceScore: v.score1,
                 SignScore: v.score2,
                 score: v.score3,

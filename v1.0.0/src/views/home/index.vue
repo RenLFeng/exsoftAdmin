@@ -9,7 +9,7 @@
         学生用户总数
         <a class="color-blue">{{studentTotal}}</a> 人
       </span>
-      <el-button type="primary" plain class="fontsize-md export-data">到出表格</el-button>
+      <el-button type="primary" plain class="fontsize-md export-data">导出表格</el-button>
     </div>
     <el-row :gutter="40">
       <el-col :lg="12" :sm="12" :xs="24" class="item-col">
@@ -38,7 +38,7 @@
                       <li class="nmber-content">
                         <el-progress
                           type="circle"
-                          :percentage="classData.bankeusecount"
+                          :percentage="bankeusepercent"
                           :strokeWidth="10"
                           :width="width"
                         ></el-progress>
@@ -51,7 +51,7 @@
                       <li class="nmber-content">
                         <el-progress
                           type="circle"
-                          :percentage="classData.zuoyewpercent"
+                          :percentage="zuoyepercent"
                           :strokeWidth="10"
                           :width="width"
                         ></el-progress>
@@ -104,7 +104,7 @@
                       <li class="nmber-content">
                         <el-progress
                           type="circle"
-                          :percentage="cloudData.bankejoincount"
+                          :percentage="bankejoinpercent"
                           :strokeWidth="10"
                           :width="width"
                         ></el-progress>
@@ -121,6 +121,7 @@
     </el-row>
     <el-row :gutter="40">
       <el-col :lg="24">
+
         <Bar :echartData="echartData" />
       </el-col>
     </el-row>
@@ -132,7 +133,7 @@
 import countTo from "vue-count-to";
 import echarts from "echarts";
 import { mapState } from "vuex";
-import { getDate, nowDate } from "../../util";
+import { getDate, getChartDate, parseChartWeekData, nowDate } from "../../util";
 import Bar from "../component/echart/bar";
 export default {
   name: "home",
@@ -151,11 +152,11 @@ export default {
           data: [
             "新增资源",
             "新增作业",
-            // "新增评测",
+             "新增评测",
             "新增签到",
             "资源总数",
             "作业总数",
-            // "评测总数",
+             "评测总数",
             "签到总数"
           ]
         },
@@ -166,42 +167,55 @@ export default {
           {
             name: "新增资源",
             type: "bar",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [],
+              matchcol:'score1'
           },
           {
             name: "新增作业",
             type: "bar",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [],
+              matchcol:'score3'
           },
-          // {
-          //   name: "新增评测",
-          //   type: "bar",
-          //     data: [0,0,0,0,0,0,0]
-          // },
+          {
+            name: "新增评测",
+            type: "bar",
+              data: [],
+              matchcol:'score4'
+          },
           {
             name: "新增签到",
-            type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            type: "bar",
+            data: [],
+              matchcol:'score2'
           },
           {
             name: "资源总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [],
+              matchcol:'score1',
+              isadd:1
           },
           {
             name: "作业总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [],
+              isadd:1,
+              matchcol:'score3'
           },
-          // {
-          //   name: "评测总数",
-          //   type: "line",
-          //     data: [0,0,0,0,0,0,0]
-          // },
+          {
+            name: "评测总数",
+            type: "line",
+              data: [],
+              isadd:1,
+              matchcol:'score4',
+
+          },
           {
             name: "签到总数",
             type: "line",
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: [],
+              isadd:1,
+              matchcol:'score2'
           }
         ]
       },
@@ -221,9 +235,25 @@ export default {
     this.getDate();
   },
   computed: {
-    ...mapState(["loginUser"])
+    ...mapState(["loginUser"]),
+      zuoyepercent(){
+        return this.classData.zuoyewpercent / 100;
+      }
+      ,bankeusepercent(){
+        if (this.classData.bankecount > 0 && this.classData.bankeusecount >=0){
+          return this.classData.bankeusecount * 100 / this.classData.bankecount;
+        }
+        return 0;
+      }
+      ,bankejoinpercent(){
+        if (this.classData.bankecount > 0 && this.cloudData.bankejoincount >= 0){
+            return this.cloudData.bankejoincount * 100 / this.classData.bankecount;
+        }
+        return 0;
+      }
   },
   methods: {
+
     getDate() {
       this.$http
         .post("/api/admin/main", {})
@@ -247,63 +277,66 @@ export default {
 
             this.classData = this.serverData.banke;
 
-            let date = getDate(this.serverData.weekactivity[0].countdate);
-            this.echartData.xAxis.data = date;
-            for (let i = 0; i < this.serverData.weekactivity.length; i++) {
-              //  for (let i = this.serverData.weekactivity.length - 1; i >= 0; i--) {
-              for (let j = 0; j < this.echartData.xAxis.data.length; j++) {
-                if (
-                  this.serverData.weekactivity[i].countdate ==
-                  this.echartData.xAxis.data[j]
-                ) {
-                  this.serverData.weekactivity[i].index = j;
-                }
-              }
-              let item = this.serverData.weekactivity[i];
-              for (let key in item) {
-                switch (key) {
-                  case "score1":
-                    for (let v of this.echartData.series) {
-                      if (v.name == "新增资源") {
-                        v.data[item.index] = item[key];
-                      }
-                      if (v.name == "资源总数") {
-                        let temp = item[key];
-                        this.rerepTotal = this.rerepTotal + temp;
-                        v.data[item.index] = this.rerepTotal;
-                         v.data[item.index+1] = this.rerepTotal;
-                      }
-                    }
-                    break;
-                  case "score2":
-                    for (let v of this.echartData.series) {
-                      if (v.name == "新增作业") {
-                        v.data[item.index] = item[key];
-                      }
-                      if (v.name == "作业总数") {
-                        let temp = item[key];
-                        this.taskTotal = this.taskTotal + temp;
-                        v.data[item.index] = this.taskTotal;
-                         v.data[item.index+1] = this.taskTotal;
-                      }
-                    }
-                    break;
-                  case "score3":
-                    for (let v of this.echartData.series) {
-                      if (v.name == "新增签到") {
-                        v.data[item.index] = item[key];
-                      }
-                      if (v.name == "签到总数") {
-                        let temp = item[key];
-                        this.signTotal = this.signTotal + temp;
-                        v.data[item.index] = this.signTotal;
-                         v.data[item.index+1] = this.signTotal;
-                      }
-                    }
-                    break;
-                }
-              }
-            }
+            this.parseChartData(this.serverData.weekactivity);
+
+            // let date = getDate(this.serverData.weekactivity[0].countdate);
+            // this.echartData.xAxis.data = date;
+            // for (let i = 0; i < this.serverData.weekactivity.length; i++) {
+            //   //  for (let i = this.serverData.weekactivity.length - 1; i >= 0; i--) {
+            //   for (let j = 0; j < this.echartData.xAxis.data.length; j++) {
+            //       console.log(this.echartData.xAxis.data[j]);
+            //     if (
+            //       this.serverData.weekactivity[i].countdate ==
+            //       this.echartData.xAxis.data[j]
+            //     ) {
+            //       this.serverData.weekactivity[i].index = j;
+            //     }
+            //   }
+            //   let item = this.serverData.weekactivity[i];
+            //   for (let key in item) {
+            //     switch (key) {
+            //       case "score1":
+            //         for (let v of this.echartData.series) {
+            //           if (v.name == "新增资源") {
+            //             v.data[item.index] = item[key];
+            //           }
+            //           if (v.name == "资源总数") {
+            //             let temp = item[key];
+            //             this.rerepTotal = this.rerepTotal + temp;
+            //             v.data[item.index] = this.rerepTotal;
+            //              v.data[item.index+1] = this.rerepTotal;
+            //           }
+            //         }
+            //         break;
+            //       case "score2":
+            //         for (let v of this.echartData.series) {
+            //           if (v.name == "新增作业") {
+            //             v.data[item.index] = item[key];
+            //           }
+            //           if (v.name == "作业总数") {
+            //             let temp = item[key];
+            //             this.taskTotal = this.taskTotal + temp;
+            //             v.data[item.index] = this.taskTotal;
+            //              v.data[item.index+1] = this.taskTotal;
+            //           }
+            //         }
+            //         break;
+            //       case "score3":
+            //         for (let v of this.echartData.series) {
+            //           if (v.name == "新增签到") {
+            //             v.data[item.index] = item[key];
+            //           }
+            //           if (v.name == "签到总数") {
+            //             let temp = item[key];
+            //             this.signTotal = this.signTotal + temp;
+            //             v.data[item.index] = this.signTotal;
+            //              v.data[item.index+1] = this.signTotal;
+            //           }
+            //         }
+            //         break;
+            //     }
+            //   }
+            // }
             this.taskTotal = 0;
             this.rerepTotal = 0;
             this.signTotal = 0;
@@ -323,6 +356,17 @@ export default {
           });
         });
     },
+
+      parseChartData(wa){
+        //! cjy:
+          //! tudo. 首先清空图表原数据
+          let ed  = this.echartData;
+
+          parseChartWeekData(ed, wa, 7, null);
+
+          //console.log(adddata);
+          //console.log(ed);
+      },
 
     onresize() {
       // console.log(document.documentElement.clientWidth / 7.5);
