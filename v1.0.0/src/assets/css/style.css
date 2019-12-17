@@ -107,3 +107,33 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.back-btn{
+  background: #F56C6C;
+  color: #fff;
+  border: none;
+  /* float: right; */
+}
+.cloud-back-wrap{
+  position: fixed;
+  width: 100%;
+  text-align: left;
+  color: #0089FF;
+  background: #fff;
+  padding: 10px 0;
+  margin: 0;
+  font-size: 20px;
+  z-index: 99999999999999;
+}
+.cloud-back-wrap i{
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  font-size: 26px;
+  transform: translate(0,-50%);
+}
+.cloud-back-wrap span{
+  margin-left: 35px;
+}
+.header-nav{
+  top: 38px;
+}

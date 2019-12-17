@@ -13,10 +13,15 @@
             class="login-ruleForm"
           >
             <el-form-item label="用户名" prop="username">
-              <el-input v-model="ruleForm2.username"></el-input>
+              <el-input v-model="ruleForm2.username" @keyup.enter.native="submitForm('ruleForm2')"></el-input>
             </el-form-item>
             <el-form-item label="密码" prop="password">
-              <el-input type="password" v-model="ruleForm2.password" autocomplete="off"></el-input>
+              <el-input
+                type="password"
+                v-model="ruleForm2.password"
+                autocomplete="off"
+                @keyup.enter.native="submitForm('ruleForm2')"
+              ></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="submitForm('ruleForm2')">登录</el-button>
@@ -63,8 +68,7 @@ export default {
     };
   },
   computed: {},
-  mounted() {
-  },
+  mounted() {},
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {

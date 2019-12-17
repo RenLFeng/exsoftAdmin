@@ -121,7 +121,6 @@
     </el-row>
     <el-row :gutter="40">
       <el-col :lg="24">
-
         <Bar :echartData="echartData" />
       </el-col>
     </el-row>
@@ -135,6 +134,7 @@ import echarts from "echarts";
 import { mapState } from "vuex";
 import { getDate, getChartDate, parseChartWeekData, nowDate } from "../../util";
 import Bar from "../component/echart/bar";
+const colors = ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
 export default {
   name: "home",
   components: { countTo, Bar },
@@ -152,11 +152,11 @@ export default {
           data: [
             "新增资源",
             "新增作业",
-             "新增评测",
+            "新增评测",
             "新增签到",
             "资源总数",
             "作业总数",
-             "评测总数",
+            "评测总数",
             "签到总数"
           ]
         },
@@ -167,55 +167,78 @@ export default {
           {
             name: "新增资源",
             type: "bar",
+            itemStyle: {
+              color: colors[0]
+            },
             data: [],
-              matchcol:'score1'
+            matchcol: "score1"
           },
           {
             name: "新增作业",
             type: "bar",
+            itemStyle: {
+              color: colors[1]
+            },
             data: [],
-              matchcol:'score3'
+            matchcol: "score3"
           },
           {
             name: "新增评测",
             type: "bar",
-              data: [],
-              matchcol:'score4'
+            itemStyle: {
+              color: colors[2]
+            },
+            data: [],
+            matchcol: "score4"
           },
           {
             name: "新增签到",
             type: "bar",
+            itemStyle: {
+              color: colors[3]
+            },
             data: [],
-              matchcol:'score2'
+            matchcol: "score2"
           },
           {
             name: "资源总数",
             type: "line",
+            lineStyle: {
+              color: colors[0]
+            },
             data: [],
-              matchcol:'score1',
-              isadd:1
+            matchcol: "score1",
+            isadd: 1
           },
           {
             name: "作业总数",
             type: "line",
+            lineStyle: {
+              color: colors[1]
+            },
             data: [],
-              isadd:1,
-              matchcol:'score3'
+            isadd: 1,
+            matchcol: "score3"
           },
           {
             name: "评测总数",
             type: "line",
-              data: [],
-              isadd:1,
-              matchcol:'score4',
-
+            lineStyle: {
+              color: colors[2]
+            },
+            data: [],
+            isadd: 1,
+            matchcol: "score4"
           },
           {
             name: "签到总数",
             type: "line",
+            lineStyle: {
+              color: colors[3]
+            },
             data: [],
-              isadd:1,
-              matchcol:'score2'
+            isadd: 1,
+            matchcol: "score2"
           }
         ]
       },
@@ -236,24 +259,27 @@ export default {
   },
   computed: {
     ...mapState(["loginUser"]),
-      zuoyepercent(){
-        return this.classData.zuoyewpercent / 100;
+    zuoyepercent() {
+      return parseInt(this.classData.zuoyewpercent / 100);
+    },
+    bankeusepercent() {
+      if (this.classData.bankecount > 0 && this.classData.bankeusecount >= 0) {
+        return parseInt(
+          (this.classData.bankeusecount * 100) / this.classData.bankecount
+        );
       }
-      ,bankeusepercent(){
-        if (this.classData.bankecount > 0 && this.classData.bankeusecount >=0){
-          return this.classData.bankeusecount * 100 / this.classData.bankecount;
-        }
-        return 0;
+      return 0;
+    },
+    bankejoinpercent() {
+      if (this.classData.bankecount > 0 && this.cloudData.bankejoincount >= 0) {
+        return parseInt(
+          (this.cloudData.bankejoincount * 100) / this.classData.bankecount
+        );
       }
-      ,bankejoinpercent(){
-        if (this.classData.bankecount > 0 && this.cloudData.bankejoincount >= 0){
-            return this.cloudData.bankejoincount * 100 / this.classData.bankecount;
-        }
-        return 0;
-      }
+      return 0;
+    }
   },
   methods: {
-
     getDate() {
       this.$http
         .post("/api/admin/main", {})
@@ -357,16 +383,16 @@ export default {
         });
     },
 
-      parseChartData(wa){
-        //! cjy:
-          //! tudo. 首先清空图表原数据
-          let ed  = this.echartData;
+    parseChartData(wa) {
+      //! cjy:
+      //! tudo. 首先清空图表原数据
+      let ed = this.echartData;
 
-          parseChartWeekData(ed, wa, 7, null);
+      parseChartWeekData(ed, wa, 7, null);
 
-          //console.log(adddata);
-          //console.log(ed);
-      },
+      //console.log(adddata);
+      //console.log(ed);
+    },
 
     onresize() {
       // console.log(document.documentElement.clientWidth / 7.5);

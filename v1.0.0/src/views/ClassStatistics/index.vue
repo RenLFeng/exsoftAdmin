@@ -44,6 +44,7 @@ import Bar from "../component/echart/bar";
 import { getDate, nowDate, parseChartWeekData, parseURL } from "../../util";
 import { mapState } from "vuex";
 import "./style/common.scss";
+const colors = ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
 const classList = [
   {
     type: "filesnum",
@@ -90,11 +91,11 @@ export default {
             "新增资源",
             "新增活动",
             "新增签到",
-              "新增评测",
+            "新增评测",
             "资源总数",
             "活动总数",
             "签到总数",
-              "评测总数",
+            "评测总数"
           ]
         },
         xAxis: {
@@ -104,55 +105,80 @@ export default {
           {
             name: "新增资源",
             type: "bar",
+            itemStyle: {
+              color: colors[0]
+            },
             data: [0, 0, 0, 0, 0, 0, 0],
-              matchcol:'score1'
+            matchcol: "score1"
           },
           {
             name: "新增活动",
             type: "bar",
+            itemStyle: {
+              color: colors[1]
+            },
             data: [0, 0, 0, 0, 0, 0, 0],
-              matchcol:'score3'
+            matchcol: "score3"
           },
           {
-                name: "新增签到",
-                type: "bar",
-                data: [0, 0, 0, 0, 0, 0, 0],
-                matchcol:'score2'
+            name: "新增签到",
+            type: "bar",
+            itemStyle: {
+              color: colors[2]
             },
-            {
-                name: "新增评测",
-                type: "bar",
-                data: [0, 0, 0, 0, 0, 0, 0],
-                matchcol:'score4'
+            data: [0, 0, 0, 0, 0, 0, 0],
+            matchcol: "score2"
+          },
+          {
+            name: "新增评测",
+            type: "bar",
+            itemStyle: {
+              color: colors[3]
             },
+            data: [0, 0, 0, 0, 0, 0, 0],
+            matchcol: "score4"
+          },
+
           {
             name: "资源总数",
             type: "line",
+            lineStyle: {
+                color: colors[0]
+            },
             data: [0, 0, 0, 0, 0, 0, 0],
-              matchcol:'score1',
-              isadd:1
+            matchcol: "score1",
+            isadd: 1
           },
           {
             name: "活动总数",
             type: "line",
+            lineStyle: {
+               color: colors[1]
+            },
             data: [0, 0, 0, 0, 0, 0, 0],
-              isadd:1,
-              matchcol:'score3'
+            isadd: 1,
+            matchcol: "score3"
           },
           {
             name: "签到总数",
             type: "line",
+            lineStyle: {
+              color: colors[2]
+            },
             data: [0, 0, 0, 0, 0, 0, 0],
-              isadd:1,
-              matchcol:'score2'
+            isadd: 1,
+            matchcol: "score2"
           },
-            {
-                name: "评测总数",
-                type: "line",
-                data: [0, 0, 0, 0, 0, 0, 0],
-                isadd:1,
-                matchcol:'score4'
-            }
+          {
+            name: "评测总数",
+            type: "line",
+            lineStyle: {
+             color: colors[3]
+            },
+            data: [0, 0, 0, 0, 0, 0, 0],
+            isadd: 1,
+            matchcol: "score4"
+          }
         ]
       },
 
@@ -210,9 +236,13 @@ export default {
               }
             }
 
-
-           // this.parseChartData(this.serverData.weekactivity);
-              parseChartWeekData(this.echartData, this.serverData.weekactivity, 7, null);
+            // this.parseChartData(this.serverData.weekactivity);
+            parseChartWeekData(
+              this.echartData,
+              this.serverData.weekactivity,
+              7,
+              null
+            );
 
             // console.log('this.classList',this.classList)
             // if (this.serverData.weekactivity.length) {

@@ -7,7 +7,8 @@ Vue.use(Router)
 // 路由懒加载
 const getComponent = (name, component) => () => import(`@/views/${name}/${component}.vue`);
 const myRouter = new Router({
-  mode: 'history',
+  // mode: 'history',
+  // base:'/backend/',
   routes: [{
       path: '/',
       redirect: '/home',

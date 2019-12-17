@@ -1,7 +1,7 @@
 <template>
   <div class="alluser-container">
     <div class="search-content filter-container">
-      <el-button class="filter-item" @click="back()">返回</el-button>
+      <el-button class="filter-item back-btn" @click="back()">返回</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
       <el-table-column v-for="(v,i) in tHead.slice(0,4)" :prop="v.prop" :label="v.title" :key="i"></el-table-column>

@@ -1,5 +1,9 @@
 <template>
   <div class="Class-Statistics-header">
+    <p class="cloud-back-wrap container" @click="back">
+      <i class="exappfont exappfanhui"></i>
+      <span class="cloud-back-btn">返回</span>
+    </p>
     <header class="header-nav">
       <div class="container">
         <div class="nav-menu clearfix">
@@ -67,7 +71,11 @@ export default {
 
   computed: {},
   mounted() {},
-  methods: {}
+  methods: {
+    back(){
+      this.$router.go(-1);
+    }
+  }
 };
 </script>
 

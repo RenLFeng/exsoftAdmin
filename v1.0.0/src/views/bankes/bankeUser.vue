@@ -9,7 +9,7 @@
       ></ExportData>
       <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(0)">添加</el-button>
-      <el-button class="filter-item" @click="back()">返回</el-button>
+      <el-button class="filter-item back-btn" @click="back()">返回</el-button>
     </div>
     <el-table :data="listData" border style="width: 100%" size="small">
       <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
