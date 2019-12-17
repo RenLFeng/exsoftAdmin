@@ -4,7 +4,7 @@
       <div v-for="(v,i) in items" :key="i" class="item">
         <el-col :lg="6" :md="8" :sm="8" :xs="12" class="item-col" @click.native="onclick(v)">
           <div class="item-warp">
-            <img class="item-img" :src="v.avatar" alt="..." />
+            <img class="item-img" :src="v.avatar" alt="..."  :onerror="$defaultImg('banke')"/>
             <div class="caption">
               <h3 class="calss-type fontsize-md ellipsis">{{v.name}}</h3>
               <p class="teacher-name fontsize-md">教师:{{v.teacherName}}</p>

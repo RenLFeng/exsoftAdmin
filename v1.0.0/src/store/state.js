@@ -7,5 +7,6 @@ const state = {
 
     ClassID:0,
     ClassTitleInfo:{},
+    isCloud:false
 }
 export default state

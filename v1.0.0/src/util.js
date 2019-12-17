@@ -260,3 +260,29 @@ export const parseURL = (url) =>{
 export const echartColor = ()=>{
   return ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3']
 }
+export const defaultImg = (type) => {
+  var srcstr = 'this.src="';
+  switch (type) {
+    case 'account':
+      srcstr += require("./assets/account_default.png");
+      srcstr += '"';
+      return srcstr;
+      break;
+    case 'banke':
+      srcstr += require("./assets/banke_default.png");
+      srcstr += '"';
+      return srcstr;
+      break;
+    case 'zuoye':
+      srcstr += require("./assets/zuoye_add.png");
+      srcstr += '"';
+      return srcstr;
+      break;
+    case 'file':
+      srcstr += require("./assets/file_default.png");
+      srcstr += '"';
+      return srcstr;
+      break;
+  }
+
+}

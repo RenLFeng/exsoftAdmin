@@ -1,10 +1,10 @@
 <template>
   <div class="Class-Statistics-header">
-    <p class="cloud-back-wrap container" @click="back">
+    <p class="cloud-back-wrap container" @click="back" v-if="isCloud">
       <i class="exappfont exappfanhui"></i>
       <span class="cloud-back-btn">返回</span>
     </p>
-    <header class="header-nav">
+    <header class="header-nav" :class="isCloud?'act':''">
       <div class="container">
         <div class="nav-menu clearfix">
           <ul class="nav navbar-nav" id="logo">
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "",
   props: {
@@ -69,7 +70,9 @@ export default {
     return {};
   },
 
-  computed: {},
+    computed: {
+        ...mapState(["isCloud"])
+      },
   mounted() {},
   methods: {
     back(){

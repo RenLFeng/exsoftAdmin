@@ -1,5 +1,5 @@
 <template>
-  <div class="Class-Statistics Statistics">
+  <div class="Class-Statistics Statistics" :class="isCloud?'act':''">
     <header2 />
     <div class="container mai">
       <ul class="content">
@@ -201,12 +201,13 @@ export default {
     this.classInfo = this.$route.params.classInfo;
     if (obj.id) {
       this.$store.commit("SET_CLASS_ID", obj.id);
+      this.$store.commit("SET_CLOUD", true);
     } else {
       this.$store.commit("SET_CLASS_ID", this.$route.params.classInfo.id);
     }
   },
   computed: {
-    ...mapState(["ClassID"])
+    ...mapState(["ClassID","isCloud"])
   },
   mounted() {
     this.getDate();

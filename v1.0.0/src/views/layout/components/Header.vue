@@ -27,6 +27,7 @@
             <img
               :src="loginUser.avatar"
               class="user-avatar"
+              :onerror="$defaultImg('account')"
             />
             {{loginUser.account}}
             <!-- <i class="el-icon-caret-bottom" /> -->

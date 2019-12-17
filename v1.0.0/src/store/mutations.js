@@ -19,5 +19,8 @@ const mutations = {
     SET_CLASS_TITLE_INFO(state,obj){
         state.ClassTitleInfo = obj;
     },
+    SET_CLOUD(state,v){
+        state.isCloud = v;
+    },
 }
 export default mutations

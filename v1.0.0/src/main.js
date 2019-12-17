@@ -11,6 +11,8 @@ import './assets/scss/global.scss'
 import '@/assets/icon/iconfont.css'
 import '@/assets/icon2/iconfont.css'
 import axios from 'axios'
+import {defaultImg} from "@/util"
+Vue.prototype.$defaultImg = defaultImg
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
 new Vue({
