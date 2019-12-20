@@ -285,6 +285,16 @@ export default {
         .post("/api/admin/main", {})
         .then(res => {
           console.log("res", res);
+          if (res.data.code != 0){
+              if (res.data.msg == 'no privilige'){
+                  //! cjy: 跳转登录
+                  this.$store.commit("SETLOGINUSER", {});
+                  this.$store.commit("COMMIT_TOKEN", null);
+                  this.$router.push("/login");
+
+              }
+              return ;
+          }
           if (res.data.code == "0") {
             this.serverData = res.data.data;
             console.log("serverData", this.serverData);

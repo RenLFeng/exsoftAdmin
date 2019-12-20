@@ -111,7 +111,7 @@ export default {
               this.listData = res.data.data.data;
               for (let i of res.data.data.bankes) {
                 for (let v of this.listData) {
-                  if (i.id == v.id) {
+                  if (i.id == v.ownerid) {
                     v.bankename = i.name;
                   }
                 }

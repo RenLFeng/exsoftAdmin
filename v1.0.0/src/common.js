@@ -13,7 +13,7 @@ export const userTableHead = [{
 {
     fixed: '',
     prop: 'name',
-    title: '角色名',
+    title: '姓名',
     width: '',
 },
 // {
@@ -51,7 +51,7 @@ export const userTableHead2 = [{
 {
     fixed: '',
     prop: 'name',
-    title: '角色名',
+    title: '姓名',
     width: '',
 },
 {

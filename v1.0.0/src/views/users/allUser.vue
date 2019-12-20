@@ -184,8 +184,8 @@ export default {
             //   json.id = v["ID"];
             case "账户名":
               json.account = v["账户名"];
-            case "角色名":
-              json.name = v["角色名"] || "";
+            case "姓名":
+              json.name = v["姓名"] || "";
             case "角色":
               json.role = this.seleceRole(v["角色"]);
             case "最后登录时间":
@@ -342,8 +342,8 @@ export default {
             });
             this.init();
           } else {
-            if (res.data.data.errmsg.includes("1062")) {
-              let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+            if (res.data.msg.includes("1062")) {
+              let errMsg = res.data.msg.split(":")[2].split("entry")[1];
               this.$message({
                 type: "error",
                 message: data ? "导入失败" : this.openFormStateText + "失败"

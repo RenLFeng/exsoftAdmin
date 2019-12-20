@@ -52,7 +52,7 @@
           <el-input v-model="banKe.name" placeholder="班课名"></el-input>
         </el-form-item>
         <el-form-item label="任课教师:" prop="useraccount">
-          <el-input v-model="banKe.useraccount" placeholder="教师名"></el-input>
+          <el-input v-model="banKe.useraccount" placeholder="教师账户"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -185,7 +185,7 @@ export default {
               for (let v of res.data.data.users) {
                 for (let i of this.listData) {
                   if (v.id == i.userid) {
-                    i.teacher = v.account;
+                    i.teacher = v.name;
                   }
                 }
               }
