@@ -28,12 +28,12 @@
           <div class="navbar-collapse collapse navbar-right">
             <ul class="nav navbar-nav fontsize-sm">
               <li class>
-                <router-link :to="{path:'/ClassStatistics',query:{}}" active-class="_active">
+                <router-link :to="{path:'/ClassStatistics',query:{}}" active-class="_active" >
                   <span class>首页</span>
                 </router-link>
               </li>
               <li class>
-                <router-link :to="{path:'/Rereport',query:{}}" active-class="_active">
+                <router-link :to="{path:'/Rereport',query:{}}" active-class="_active" >
                   <span class>资源报告</span>
                 </router-link>
               </li>
@@ -73,7 +73,9 @@ export default {
     computed: {
         ...mapState(["isCloud"])
       },
-  mounted() {},
+  mounted() {
+      console.log(this.$store.state.isCloud);
+  },
   methods: {
     back(){
       this.$router.go(-1);

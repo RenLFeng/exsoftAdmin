@@ -7,7 +7,7 @@
         <el-row class="content-icon">
           <div v-for="(v,i) in classList" :key="i">
             <el-col :lg="8" :md="8" :sm="12" :xs="12">
-              <ul class="item">
+              <ul class="item" @click="onitem(v)">
                 <li>
                   <div>
                     <i :class="'exappfont icon-fontsize-xl '+v.icon" :style="{color:v.color}"></i>
@@ -200,8 +200,11 @@ export default {
     const obj = parseURL(window.location.href);
     this.classInfo = this.$route.params.classInfo;
     if (obj.id) {
-      this.$store.commit("SET_CLASS_ID", obj.id);
-      this.$store.commit("SET_CLOUD", true);
+        this.$store.commit("SET_CLASS_ID", obj.id);
+        this.$store.commit("SET_CLOUD", true);
+    }else if (obj.backendid){
+        this.$store.commit("SET_CLASS_ID", obj.backendid);
+        this.$store.commit("SET_CLOUD",  false);
     } else {
       this.$store.commit("SET_CLASS_ID", this.$route.params.classInfo.id);
     }
@@ -213,6 +216,22 @@ export default {
     this.getDate();
   },
   methods: {
+      onitem(v){
+          console.log(v);
+          let tourl = '';
+          if (v.type == 'filesnum'){
+              tourl = '/Rereport';
+          }
+          else if (v.type == 'membernum'){
+              tourl = '/Analysis';
+          }
+          else if (v.type == 'signum' || v.type=='zuoyenum'){
+              tourl = '/Actreport';
+          }
+          if (tourl.length > 0){
+              this.$router.push(tourl);
+          }
+      },
     getDate() {
       this.$http
         .post("/api/bankecount/main", { id: this.ClassID })
@@ -224,6 +243,10 @@ export default {
               name: this.serverData.banke.name,
               teacherName: this.serverData.banke.username
             };
+
+            let pagetitle = '教学报告-' + this.classTitInfo.name;
+            document.title = pagetitle;
+
             this.$store.commit("SET_CLASS_TITLE_INFO", this.classTitInfo);
             this.istrue = true;
             console.log("serverData", this.serverData);

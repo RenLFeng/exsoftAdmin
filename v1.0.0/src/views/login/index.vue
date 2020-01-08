@@ -12,7 +12,7 @@
             label-width="100px"
             class="login-ruleForm"
           >
-            <el-form-item label="用户名" prop="username">
+            <el-form-item label="姓名" prop="username">
               <el-input v-model="ruleForm2.username" @keyup.enter.native="submitForm('ruleForm2')"></el-input>
             </el-form-item>
             <el-form-item label="密码" prop="password">
@@ -51,7 +51,7 @@ export default {
     };
     var validateName = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("请输入用户名"));
+        callback(new Error("请输入昵称"));
       } else {
         callback();
       }
@@ -62,7 +62,6 @@ export default {
         username: ""
       },
       rules2: {
-        password: [{ validator: validatePass, trigger: "blur" }],
         username: [{ validator: validateName, trigger: "blur" }]
       }
     };
@@ -80,7 +79,7 @@ export default {
             })
             .then(res => {
               if (res.data.code == "0") {
-                if (res.data.data.role == "100") {
+                if (res.data.data.role >= 50) {
                   console.log("成功", res);
                   this.$store.commit("SETLOGINUSER", res.data.data);
                   this.$store.commit("COMMIT_TOKEN", res.data.data.id);

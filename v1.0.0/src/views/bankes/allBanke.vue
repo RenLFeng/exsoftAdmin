@@ -6,38 +6,49 @@
         placeholder="班课名"
         style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleSeach"
+      />
+      <el-input
+              v-model="listQuery.schoolid"
+              placeholder="学校ID"
+              style="width: 200px;"
+              class="filter-item"
       />
       <el-select
         v-model="listQuery.order"
         placeholder="排序"
         style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleSeach"
       >
         <el-option label="升序" value="asc" />
         <el-option label="降序" value="desc" />
       </el-select>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleSeach">搜索</el-button>
+      <br/>
       <ExportData
         :isForBidden="ExportDataState"
         :tHeaderFather="tHead"
         :filterArrayLists="listData"
         :ExportFileName="ExportFileName"
       ></ExportData>
-      <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
-      <el-button class="filter-item" type="primary" @click="handleClickUpdateData(banKe,0)">新增</el-button>
+      <!-- <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" /> -->
+      <!-- <el-button class="filter-item" type="primary" @click="handleClickUpdateData(banKe,0)">新增</el-button> -->
     </div>
-    <el-table :data="listData" border style="width: 100%" size="small">
+    <el-table :data="listData" border style="width: 100%" size="small"
+    v-loading="listLoading"
+    >
       <el-table-column v-for="(v,i) in bankeTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
           <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看成员</el-button>
-          <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button>
+          <!-- <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button> -->
+          <el-button type="primary" @click="seeanalyze(scope.row)" size="small">学情统计</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pagesize" @pagination="getList" />
+
     <!-- dialog -->
     <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible" class="creater-form">
       <el-form
@@ -78,17 +89,22 @@
 </template>
 
 <script>
-import { filterKey } from "@/util";
-import { bankeTableHead, roleType } from "@/common.js";
+import { filterKey,filterSearchKey } from "@/util";
+import { bankeTableHead, roleType,filter } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
 import UploadExcelComponent from "@/views/component/importExcel";
+
+import Pagination from '@/components/Pagination'
+
+
 export default {
   name: "",
   components: {
     createrUser,
     ExportData,
-    UploadExcelComponent
+    UploadExcelComponent,
+      Pagination
   },
   data() {
     return {
@@ -97,8 +113,13 @@ export default {
 
       listQuery: {
         name: "",
-        order: ""
+        order: "",
+          schoolid:"",
+          page:1,
+          pagesize:50,
       },
+        total:0,
+        listLoading:false,
       bankeTableHead: bankeTableHead,
       listData: [],
       downloadLoading: false,
@@ -121,7 +142,8 @@ export default {
     };
   },
   created() {
-    this.getAllUser({});
+   // this.getAllUser({});
+      this.getList()
   },
   computed: {
     openFormStateText() {
@@ -173,14 +195,22 @@ export default {
       this.createData(serveData);
     },
 
+      getList(){
+          this.getAllUser(filterSearchKey(this.listQuery));
+      },
     //获取所有班课
     getAllUser(data) {
+        this.listLoading = true;
+        data.page = data.page-1;
       this.$http
         .post("/api/admin/bankequery", data)
         .then(res => {
+            this.listLoading = false;
           if (res.data.code == 0) {
-            if (res.data.data.data.length) {
-              this.listData = res.data.data.data;
+           // if (res.data.data.data.length)
+            {
+              this.listData = filter(res.data.data.data);
+              this.total = res.data.data.count;
               console.log(res);
               for (let v of res.data.data.users) {
                 for (let i of this.listData) {
@@ -194,29 +224,28 @@ export default {
                 type: "success",
                 message: "加载成功"
               });
-            } else {
-              this.$message({
-                type: "info",
-                message: "暂无数据"
-              });
             }
+            // else {
+            //   this.$message({
+            //     type: "info",
+            //     message: "暂无数据"
+            //   });
+            // }
           }
         })
         .catch(res => {
-          console.log("res");
+            this.listLoading = false;
+          console.log(res);
           this.$message({
             type: "error",
-            message: "error"
+            message: "异常"
           });
         });
     },
     //搜索
     handleSeach() {
-      this.getAllUser(this.listQuery);
-      this.listQuery = {
-        name: "",
-        order: ""
-      };
+        this.listQuery.page = 1;
+      this.getAllUser(filterSearchKey(this.listQuery));
     },
     //导入
     handleExport() {},
@@ -239,17 +268,21 @@ export default {
       let data = { row: row, state: false };
       this.$emit("bankeUser", data);
     },
+      seeanalyze(rowdata){
+          let url =  '/#/ClassStatistics?backendid=' + rowdata.id
+          window.open(url);
+      },
     //删除
     handleClickDeleteData(row) {
       console.log(row);
-      this.$confirm("此操作将永久删除该信息, 是否继续?", "提示", {
+      this.$confirm("此操作将永久删除该班课, 不可恢复，是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
           this.$http
-            .post("api/admin/bankedelete", { id: row.id })
+            .post("/api/admin/bankedelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
                 this.listData = this.listData.filter(v => {
@@ -310,16 +343,17 @@ export default {
         .post("/api/admin/bankeadd", json)
         .then(res => {
           if (res.data.code == 0) {
-            this.getAllUser({});
+         //   this.getAllUser({});
+              this.getList();
             this.dialogFormVisible = false;
             this.$message({
               type: "success",
               message: this.openFormStateText + "成功"
             });
-            this.init();
+           // this.init();
           } else {
-            if (res.data.data.errmsg.includes("1062")) {
-              let errMsg = res.data.data.errmsg.split(":")[2].split("entry")[1];
+            if (res.data.msg.includes("1062")) {
+              let errMsg = res.data.msg.split(":")[2].split("entry")[1];
               this.$message({
                 type: "error",
                 message: data ? "导入失败" : this.openFormStateText + "失败"
@@ -341,9 +375,9 @@ export default {
         .catch(res => {
           this.$message({
             type: "error",
-            message: res.data.msg
+            message: '异常'
           });
-          console.log("res");
+          console.log(res);
         });
     }
   }

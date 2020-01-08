@@ -80,7 +80,7 @@ axios.interceptors.response.use(
                 );
                 break;
             case 401:
-                messages("warning", "用户登陆过期，请重新登陆");
+                messages("warning", "登陆过期，请重新登陆");
                 localStorage.removeItem("token");
                 setTimeout(() => {
                     router.replace({

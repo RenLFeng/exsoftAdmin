@@ -62,7 +62,7 @@ export default {
   },
   computed: {
     openFormStateText() {
-      return this.openForm ? "编辑用户" : "新增用户";
+      return this.openForm ? "编辑账户" : "新增账户";
     }
   },
   methods: {
@@ -124,7 +124,7 @@ export default {
       })
         .then(() => {
           this.$http
-            .post("api/admin/zuoyesubmitdelete", { id: row.id })
+            .post("/api/admin/zuoyesubmitdelete", { id: row.id })
             .then(res => {
               if (res.data.code == 0) {
                 this.listData = this.listData.filter(v => {

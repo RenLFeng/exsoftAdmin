@@ -34,6 +34,9 @@ export default {
   },
   methods: {
     getAllUser(data) {
+        //! cjy: 这里只查阅活跃的班课
+        data.states = 10;
+        data.pagesize = 1000; //! 因为这里不做分页， 加大查询数
       this.$http
         .post("/api/admin/bankequery", data)
         .then(res => {

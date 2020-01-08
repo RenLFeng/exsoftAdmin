@@ -2,6 +2,64 @@ export const filterKey = v => {
   return Object.keys(v)
 
 }
+
+export const getDateStrDesc=v=>{
+    let cur = v;
+    let m = cur.getMonth() + 1;
+    let d = cur.getDate();
+    let dayarray = [cur.getFullYear()+'', m<10? '0'+m:''+m,
+        d<10?'0'+d:''+d];
+    let str = (dayarray.join('-'));
+    let h = cur.getHours();
+    h = h<10? '0'+h:''+h;
+    let mm = cur.getMinutes();
+    mm = mm<10?'0'+mm:''+mm;
+    let ss = cur.getSeconds();
+    ss = ss<10?'0'+ss:''+ss;
+    str += ' ' + h + ':' + mm + ':' +ss;
+    return str;
+}
+
+export const filterSearchKey = v=>{
+    let keys = Object.keys(v);
+    let oret = {};
+    for(let i of keys ){
+        if (typeof v[i] == 'string'){
+            if (v[i].length > 0){
+                oret[i] = v[i];
+            }
+        }
+        else if (typeof v[i] != 'undefined'){
+            oret[i] = v[i];
+        }
+    }
+    return oret;
+}
+
+export const cloneobj =  (obj) =>{
+    var o;
+    if (typeof obj == "object") {
+        if (obj === null) {
+            o = null;
+        } else {
+            if (obj instanceof Array) {
+                o = [];
+                for (var i = 0, len = obj.length; i < len; i++) {
+                    o.push(cloneobj(obj[i]));
+                }
+            } else {
+                o = {};
+                for (var j in obj) {
+                    o[j] = cloneobj(obj[j]);
+                }
+            }
+        }
+    } else {
+        o = obj;
+    }
+    return o;
+}
+
 export const nowDate = (v) => {
   let date = new Date();
   if (v) {

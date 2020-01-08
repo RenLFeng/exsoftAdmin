@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="content-tit fontsize-sm">
-      <p>教学报告</p>
+      <p>{{acttitle}}</p>
       <div>
         <p>班课名称: {{ClassTitleInfo.name}}</p>
         <p>教师: {{ClassTitleInfo.teacherName}}</p>
@@ -25,6 +25,19 @@ export default {
     return {};
   },
   computed: {
+      acttitle(){
+          let curpath = this.$route.path;
+          if (curpath == '/Rereport'){
+              return '资源报告';
+          }
+          else if (curpath == '/Actreport'){
+              return '活动报告';
+          }
+          else if (curpath == '/Analysis'){
+              return '学情分析';
+          }
+          return '教学报告';
+      },
     ...mapState(["ClassTitleInfo"])
   },
   methods: {}

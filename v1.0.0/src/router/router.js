@@ -61,14 +61,31 @@ const myRouter = new Router({
             title: '学情统计'
           }
         },
-        {
-          path: '/allUser',
-          component: getComponent('users', 'index'),
-          name: 'allUser',
-          meta: {
-            title: '所有用户'
-          }
-        },
+
+          {
+              path: '/allUser',
+              component: getComponent('users', 'index'),
+              name: 'allUser',
+              meta: {
+                  title: '所有账户'
+              }
+          },
+          {
+              path: '/allSchoolUser',
+              component: getComponent('schoolusers', 'index'),
+              name: 'allSchoolUser',
+              meta: {
+                  title: '所有用户'
+              }
+          },
+          {
+              path: '/allSchool',
+              component: getComponent('school', 'index'),
+              name: 'allSchool',
+              meta: {
+                  title: '学校管理'
+              }
+          },
         {
           path: '/allBanke',
           component: getComponent('bankes', 'index'),
@@ -101,18 +118,6 @@ const myRouter = new Router({
             title: '所有回复'
           }
         },
-
-
-
-
-
-
-
-
-
-
-
-
 
         {
           path: '/icon',

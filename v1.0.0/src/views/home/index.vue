@@ -293,6 +293,17 @@ export default {
                   this.$router.push("/login");
 
               }
+              else if (res.data.msg == 'not bind school'){
+
+                  this.$message({
+                      message: "当前账户未绑定学校，不允许登陆",
+                      type: "warning"
+                  });
+
+                  this.$store.commit("SETLOGINUSER", {});
+                  this.$store.commit("COMMIT_TOKEN", null);
+                  this.$router.push("/login");
+              }
               return ;
           }
           if (res.data.code == "0") {

@@ -46,155 +46,109 @@
 import { mapState } from "vuex";
 export default {
   data() {
-    return {
-      items: [
-        {
+      let curu = this.$store.state.loginUser;
+
+      //console.log(curu);
+
+      let items = [];
+      items.push({
           icon: "iconshouye",
           index: "home",
           title: "系统首页"
-        },
-        {
+      });
+      items.push({
           icon: "exappfont exappshujutongji",
           index: "Statistics",
           title: "学情统计"
-        },
-        {
-          icon: "iconyonghu",
-          index: "users",
-          title: "用户管理",
+      });
+      if (curu.role == 100){
+          items.push({
+              icon: "iconyonghu",
+              index: "users",
+              title: "账户管理",
+              subs: [
+                  {
+                      index: "allUser",
+                      title: "所有账户"
+                  }
+              ]
+          });
+      }
+      items.push({
+          icon: "iconbianzu",
+          index: "school",
+          title: "学校管理",
           subs: [
-            {
-              index: "allUser",
-              title: "所有用户"
-            }
+              {
+                  index: "allSchool",
+                  title: "所有学校"
+              }
           ]
-        },
-        {
+      });
+      if (curu.role == 50){
+          //! 校管理员
+          items.push({
+              icon: "iconyonghu",
+              index: "schoolusers",
+              title: "用户管理",
+              subs: [
+                  {
+                      index: "allSchoolUser",
+                      title: "所有用户"
+                  }
+              ]
+          });
+      }
+      items.push( {
           icon: "iconbianzu",
           index: "banke",
           title: "班课管理",
           subs: [
-            {
-              index: "allBanke",
-              title: "所有班课"
-            }
+              {
+                  index: "allBanke",
+                  title: "所有班课"
+              }
           ]
-        },
-        {
+      });
+      items.push({
           icon: "iconzhuanyeziyuanku",
           index: "zuoye",
           title: "作业管理",
           subs: [
-            {
-              index: "allZuoye",
-              title: "所有作业"
-            }
+              {
+                  index: "allZuoye",
+                  title: "所有作业"
+              }
           ]
-        },
-        {
-          icon: "iconxiaoxi",
-          index: "comment",
-          title: "评论管理",
-          subs: [
-            {
-              index: "allComment",
-              title: "所有评论"
-            },
-            {
-              index: "allAnswer",
-              title: "所有回复"
-            }
-          ]
-        }
+      });
+      if (curu.role == 100){
+          items.push({
+              icon: "iconxiaoxi",
+              index: "comment",
+              title: "评论管理",
+              subs: [
+                  {
+                      index: "allComment",
+                      title: "所有评论"
+                  },
+                  {
+                      index: "allAnswer",
+                      title: "所有回复"
+                  }
+              ]
+          });
+      }
 
-        // {
-        //   icon: "el-icon-edit-outline",
-        //   index: "icon",
-        //   title: "excel"
-        // },
-        // {
-        //   icon: "el-icon-edit-outline",
-        //   index: "component",
-        //   title: "组件",
-        //   subs: [
-        //     {
-        //       index: "editor",
-        //       title: "富文本编译器"
-        //     },
-        //     {
-        //       index: "countTo",
-        //       title: "数字滚动"
-        //     },
-        //     {
-        //       index: "trees",
-        //       title: "树形控件",
-        //       subs: [
-        //         {
-        //           index: "tree",
-        //           title: "自定义树"
-        //         },
-        //         {
-        //           index: "treeSelect",
-        //           title: "下拉树"
-        //         }
-        //         // ,{
-        //         //   index:'treeTable',
-        //         //   title:'表格树',
-        //         // }
-        //       ]
-        //     }
-        //   ]
-        // },
-        // {
-        //   icon: "el-icon-edit-outline",
-        //   index: "draggable",
-        //   title: "拖拽",
-        //   subs: [
-        //     {
-        //       index: "draglist",
-        //       title: "拖拽列表"
-        //     },
-        //     {
-        //       index: "dragtable",
-        //       title: "拖拽表格"
-        //     }
-        //   ]
-        // },
-        // {
-        //   icon: "el-icon-edit-outline",
-        //   index: "charts",
-        //   title: "图表",
-        //   subs: [
-        //     {
-        //       index: "cricle",
-        //       title: "饼图"
-        //     }
-        //   ]
-        // }
-        // {
-        //   icon: "el-icon-edit-outline",
-        //   index: "7",
-        //   title: "错误处理",
-        //   subs: [
-        //     {
-        //       index: "permission",
-        //       title: "权限测试"
-        //     },
-        //     {
-        //       index: "404",
-        //       title: "404页面"
-        //     }
-        //   ]
-        // },
-      ]
-    };
+      return {
+          items: items
+      };
   },
   computed: {
     onRoutes() {
       console.log(this.$route.path.replace("/", ""));
       return this.$route.path.replace("/", "");
     },
-    ...mapState(["isCollapse"])
+    ...mapState(["isCollapse", "loginUser"])
   },
   methods: {
     handleOpen(key, keyPath) {
