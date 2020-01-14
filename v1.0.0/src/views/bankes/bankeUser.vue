@@ -11,14 +11,42 @@
       <el-button class="filter-item" type="primary" @click="handleClickUpdateData(0)">添加</el-button>
       <el-button class="filter-item back-btn" @click="back()">返回</el-button>
     </div>
-    <el-table :data="listData" border style="width: 100%" size="small">
-      <el-table-column v-for="(v,i) in tHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+
+    <div class="fontsize-md">
+      班课[{{curbanke.name}}]的成员
+    </div>
+    <br/>
+    <el-table :data="listData" border style="width: 100%" size="small" v-loading="listLoading">
+
+      <el-table-column
+              v-for="(v,i) in tHead.slice(0,3)"
+              :prop="v.prop"
+              :label="v.title"
+              :key="i"
+      ></el-table-column>
+      <el-table-column prop="avatar" label="头像">
+        <template slot-scope="scope">
+          <img class="tabel-img" :src="scope.row.avatar" alt />
+        </template>
+      </el-table-column>!
+      <el-table-column
+              v-for="v in tHead.slice(3)"
+              :prop="v.prop"
+              :label="v.title"
+              :key="v.prop"
+      ></el-table-column>
+
+
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pagesize" @pagination="getList" />
+
     <!-- /// -->
     <el-dialog :title="openFormStateText" :visible.sync="dialogFormVisible" class="creater-form">
       <el-form
@@ -49,6 +77,7 @@ import { roleType } from "@/common.js";
 import createrUser from "./create";
 import ExportData from "@/views/component/ExportData";
 import UploadExcelComponent from "@/views/component/importExcel";
+import Pagination from '@/components/Pagination'
 const tHead = [
   {
     fixed: "",
@@ -67,7 +96,25 @@ const tHead = [
     prop: "name",
     title: "姓名",
     width: ""
-  }
+  },
+    {
+        fixed:'',
+        prop:'sno',
+        title:'学号',
+        width:''
+    },
+    {
+        fixed:'',
+        prop:'scoredesc',
+        title:'得分情况',
+        width:''
+    },
+    {
+        fixed:'',
+        prop:'scoretotal',
+        title:'综合得分',
+        width:''
+    }
 ];
 export default {
   name: "",
@@ -75,14 +122,19 @@ export default {
   components: {
     createrUser,
     ExportData,
-    UploadExcelComponent
+    UploadExcelComponent,
+      Pagination
   },
   data() {
     return {
       listQuery: {
         name: "",
-        order: "desc"
+        order: "desc",
+          page:1,
+          pagesize:500
       },
+        total:0,
+        listLoading:false,
       tHead: tHead,
       listData: [],
       downloadLoading: false,
@@ -100,8 +152,11 @@ export default {
         // teacher: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
-      ExportFileName: "表格",
-      tHead: tHead
+     // ExportFileName: "表格",
+      tHead: tHead,
+        curbanke:{
+          name:''
+        }
     };
   },
   created() {
@@ -111,6 +166,10 @@ export default {
     openFormStateText() {
       return this.openForm ? "编辑成员" : "新增成员";
     }
+    ,ExportFileName(){
+        return this.curbanke.name + '-成员名单'
+       // return '表格'
+      }
   },
   methods: {
     beforeUpload(file) {
@@ -152,40 +211,77 @@ export default {
       }
       this.createData(serveData);
     },
+      getList(){
+        this.getAllUser();
+      },
     //获取所有用户数据
     getAllUser() {
       this.$http
-        .post("/api/admin/bankememberquery", { classid: this.id })
+        .post("/api/admin/bankememberquery", {
+            classid: this.id,
+            pagesize:this.listQuery.pagesize,
+            page:this.listQuery.page-1
+        })
         .then(res => {
           if (res.data.code == 0) {
-            if (res.data.data.data.length) {
-              this.listData = res.data.data.data;
+           // if (res.data.data.data.length)
+            {
+                this.total = res.data.data.count;
+                let mlist = res.data.data.data;
+                let banke = res.data.data.banke;
+                let binds = res.data.data.binds;
               for (let i of res.data.data.users) {
-                for (let v of this.listData) {
+                for (let v of mlist) {
                   if (i.id == v.memberuserid) {
                     v.account = i.account;
                     v.name = i.name;
+                    v.avatar  = i.avatar;
+                    break;
                   }
                 }
               }
+              for (let v of mlist){
+                  v.scoredesc = v.score1 + '/' + v.score2 + '/' + v.score3 + '/' + v.score4
+                  v.scoretotal = v.score1*banke.scorerule1 + v.score2*banke.scorerule2 + v.score3*banke.scorerule3 + v.score4 * banke.scorerule4
+                  v.scoretotal /= 100
+                  if (binds){
+                      for (let b of binds){
+                          if (b.userid == v.memberuserid){
+                              v.sno = b.sno
+                              break;
+                          }
+                      }
+                  }
+              }
+
+              this.listData = mlist;
+              this.curbanke = banke;
+
               console.log(res);
               this.$message({
                 type: "success",
                 message: "加载成功"
               });
-            } else {
-              this.$message({
-                type: "info",
-                message: "暂无数据"
-              });
             }
+            // else {
+            //   this.$message({
+            //     type: "info",
+            //     message: "暂无数据"
+            //   });
+            // }
+          }
+          else{
+              this.$message({
+                  type: "error",
+                  message: res.data.msg
+              });
           }
         })
         .catch(res => {
-          console.log("res");
+       //   console.log("res");
           this.$message({
             type: "error",
-            message: res.data.msg
+            message: 'error'
           });
         });
     },

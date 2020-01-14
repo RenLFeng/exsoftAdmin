@@ -32,7 +32,28 @@
     <el-table :data="listData" border style="width: 100%" size="small"
               v-loading="listLoading"
     >
-      <el-table-column v-for="(v,i) in schoolTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column>
+      <!--
+      <el-table-column v-for="(v,i) in schoolTableHead" :prop="v.prop" :label="v.title" :key="i"></el-table-column> -->
+      <el-table-column
+              v-for="(v,i) in schoolTableHead.slice(0,2)"
+              :prop="v.prop"
+              :label="v.title"
+              :key="i"
+      ></el-table-column>
+
+      <el-table-column prop="avatar" label="校徽">
+        <template slot-scope="scope">
+          <img class="tabel-img" :src="scope.row.avatar" alt />
+        </template>
+      </el-table-column>
+
+      <el-table-column
+              v-for="v in schoolTableHead.slice(2)"
+              :prop="v.prop"
+              :label="v.title"
+              :key="v.prop"
+      ></el-table-column>
+
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
           <div v-if="canopt">
@@ -75,6 +96,9 @@
           <el-form-item label="学校名:" prop="name" v-else>
             {{banKe.name}}
           </el-form-item>
+          <el-form-item label="校徽：" v-if="openForm != 'bind'">
+            <pan-thumb :image="banKe.avatar" width="50px" height="50px" @click.native="imagecropperShow=true"/>
+          </el-form-item>
           <el-form-item label="状态：" v-if="openForm != 'add'">
             {{banKe.statesdesc}}
           </el-form-item>
@@ -94,6 +118,9 @@
         <div v-else>
           <el-form-item label="学校名:" prop="name" >
             {{banKe.name}}
+          </el-form-item>
+          <el-form-item label="校徽：" v-if="openForm != 'bind'">
+            <pan-thumb :image="banKe.avatar" width="50px" height="50px" @click.native="imagecropperShow=true"/>
           </el-form-item>
           <el-form-item label="状态：">
             {{banKe.statesdesc}}
@@ -115,6 +142,18 @@
         <el-button type="primary" @click="createData()">确定</el-button>
       </div>
     </el-dialog>
+
+
+    <image-cropper
+            v-show="imagecropperShow"
+            :key="imagecropperKey"
+            :width="300"
+            :height="300"
+            url="/api/admin/saveschoolavatar"
+            lang-type="zh"
+            @close="imgcropclose"
+            @crop-upload-success="imgcropsuccess"
+    />
 
     <!-- <div class="app-container">
       <upload-excel-component :on-success="handleSuccess" :before-upload="beforeUpload" />
@@ -140,13 +179,18 @@ import ExportData from "@/views/component/ExportData";
 import UploadExcelComponent from "@/views/component/importExcel";
 import {mapState} from 'vuex';
 import Pagination from '@/components/Pagination'
+
+import ImageCropper from '@/components/ImageCropper'
+import PanThumb from '@/components/PanThumb'
+
 export default {
   name: "",
   components: {
     createrUser,
     ExportData,
     UploadExcelComponent,
-      Pagination
+      Pagination,
+      ImageCropper,PanThumb,
   },
   data() {
       var checkAccount = (rule, value, callback)=>{
@@ -220,11 +264,15 @@ export default {
           maxbankenum:10,
           maxbankemnum:100,
           maxbankeperuser:2,
+          avatar:''
       }
 
     return {
       tableData: [],
       tableHeader: [],
+
+        imagecropperShow: false,
+        imagecropperKey: 0,
 
       listQuery: {
         name: "",
@@ -253,7 +301,7 @@ export default {
 
       },
       ExportDataState: false,
-      ExportFileName: "表格",
+      ExportFileName: "学校列表",
       tHead: schoolTableHead
     };
   },
@@ -384,12 +432,24 @@ export default {
     //搜索
     handleSeach() {
         this.listQuery.page = 1;
-      this.getAllUser(filterSearchKey(this.listQuery));
+  //    this.getAllUser(filterSearchKey(this.listQuery));
+        this.getList()
       // this.listQuery = {
       //   name: "",
       //   order: ""
       // };
     },
+      imgcropsuccess(resData) {
+          this.imagecropperShow = false
+          this.imagecropperKey = this.imagecropperKey + 1
+          console.log(resData)
+          let url = resData.filepath; //resData.files.avatar
+         // console.log('imgcropsuccess:' + url)
+          this.banKe.avatar = url;
+      },
+      imgcropclose() {
+          this.imagecropperShow = false
+      },
     //导入
     handleExport() {},
     //编辑or新增
@@ -533,6 +593,7 @@ export default {
         }
         if (this.openForm != 'bind'){
             o.name = item.name;
+            o.avatar = item.avatar;
         }
         if (this.openForm == 'add' || this.openForm == 'bind'){
             o.useraccount = item.useraccount;
@@ -553,6 +614,7 @@ export default {
               uploadobj = {
                   id:this.banKe.id,
                   maxbankeperuser:this.banKe.maxbankeperuser,
+                  avatar:this.banKe.avatar
               }
           }
         json.data[0] = uploadobj;

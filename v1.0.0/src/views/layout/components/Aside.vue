@@ -121,7 +121,8 @@ export default {
               }
           ]
       });
-      if (curu.role == 100){
+      //if (curu.role == 100)
+      {
           items.push({
               icon: "iconxiaoxi",
               index: "comment",

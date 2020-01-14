@@ -8,7 +8,7 @@
         class="filter-item"
       />
       <el-select v-model="listQuery.schoolrole" placeholder="用户类型" style="width: 200px;margin-right:5px;">
-        <el-option v-for="v in roleType" :key="v.role" :label="v.label" :value="v.role"></el-option>
+        <el-option v-for="v in searchrtype" :key="v.role" :label="v.label" :value="v.role"></el-option>
       </el-select>
       <el-select
         v-model="listQuery.order"
@@ -34,7 +34,7 @@
      v-loading="listLoading"
     >
       <el-table-column
-        v-for="(v,i) in userTableHead.slice(0,3)"
+        v-for="(v,i) in userTableHead"
         :prop="v.prop"
         :label="v.title"
         :key="i"
@@ -47,11 +47,16 @@
       </el-table-column>!
       -->
       <el-table-column
-        v-for="v in userTableHead.slice(3)"
+        v-for="v in bindHead"
         :prop="v.prop"
         :label="v.title"
         :key="v.prop"
       ></el-table-column>
+      <el-table-column prop="avatar" label="绑定头像">
+        <template slot-scope="scope">
+          <img class="tabel-img" :src="scope.row.useravatar" alt />
+        </template>
+      </el-table-column>
 
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -96,7 +101,7 @@
 </template>
 
 <script>
-import { filterKey,filterSearchKey,cloneobj } from "@/util";
+import { filterKey,filterSearchKey,cloneobj,showErrMsg } from "@/util";
 import { schoolroleType } from "@/common";
 import ExportData from "@/views/component/ExportData";
 import UploadExcelComponent from "@/views/component/importExcel";
@@ -116,6 +121,26 @@ export default {
       Pagination
   },
   data() {
+      let bindst = [
+          {
+              fixed:'',
+              prop:'bindtime',
+              title:'绑定时间',
+              width:'',
+          },
+          {
+              fixed:'',
+              prop:'useraccount',
+              title:'绑定账户',
+              width:'',
+          },
+          {
+              fixed:'',
+              prop:'username',
+              title:'绑定昵称',
+              width:'',
+          }
+      ]
       let sst= [{
               fixed: '',
               prop: 'id',
@@ -146,6 +171,11 @@ export default {
           schoolpwd: "",
           sno:'',
       }
+      let searchrtype = cloneobj(schoolroleType)
+      searchrtype.unshift({
+          role:'',
+          label:'不限'
+      })
     return {
       listQuery: {
         sno: "",
@@ -156,12 +186,14 @@ export default {
         total:0,
         listLoading:false,
       userTableHead: sst,
+        bindHead:bindst,
       allUserData: [],
       downloadLoading: false,
       dialogFormVisible: false,
         tempdefault:tmpdefault,
       temp: tmpdefault,
       roleType: schoolroleType,
+        searchrtype:searchrtype,
       openForm: 0,
       rules: {
         sno: [{ required: true, message: "请输入学号/工号", trigger: "blur" }],
@@ -170,7 +202,7 @@ export default {
         ],
       },
       ExportDataState: true,
-      ExportFileName: "表格",
+      ExportFileName: "用户列表",
       tHead: sst,
     //  seachData: {}
     };
@@ -239,6 +271,7 @@ export default {
         case "教师":
           return 10;
       }
+      return 5
     },
       getList(){
         let o = filterSearchKey(this.listQuery)
@@ -257,8 +290,24 @@ export default {
             {
               console.log("userquery", res);
               this.total = res.data.data.count
-              this.allUserData = res.data.data.data;
-              filter(this.allUserData);
+              //this.allUserData = res.data.data.data;
+                let ulist = res.data.data.data;
+              let binds = res.data.data.binds;
+              if (binds){
+                  for(let u of ulist){
+                      for(let b of binds){
+                          if (b.schooluserid == u.id){
+                              u.bindtime = b.bindtime
+                              u.userid = b.userid;
+                              u.useraccount = b.useraccount
+                              u.useravatar = b.useravatar
+                              u.username = b.username
+                          }
+                      }
+                  }
+              }
+              filter(ulist);
+              this.allUserData = ulist;
               this.$message({
                 type: "success",
                 message: "获取数据成功"
@@ -396,32 +445,38 @@ export default {
             });
          //   this.init();
           } else {
-            if (res.data.msg.includes("1062")) {
-              let errMsg = res.data.msg.split(":")[2].split("entry")[1];
-              this.$message({
-                type: "error",
-                message: data ? "导入失败" : this.openFormStateText + "失败"
-              });
-              this.$alert(
-                "<div><p>请查看是否重复账户</p><p>发现如一下问题:" +
-                  errMsg +
-                  "</p></div>",
-                data ? "导入失败" : this.openFormStateText + "失败",
-                {
-                  confirmButtonText: "确定",
-                  center: true,
-                  dangerouslyUseHTMLString: true
-                }
-              );
-            }
+              showErrMsg(this, res.data.msg)
+            // if (res.data.msg.includes("1062")) {
+            //   let errMsg = ''; //res.data.msg.split(":")[2].split("entry")[1];
+            //     let msg = res.data.msg
+            //    errMsg = msg.match("(Duplicate entry ')(.*?)(' for key)")
+            //     console.log(errMsg);
+            //     console.log(msg);
+            //   this.$message({
+            //     type: "error",
+            //     message: data ? "导入失败" : this.openFormStateText + "失败"
+            //   });
+            //   this.$alert(
+            //     "<div><p>请查看是否重复账户</p><p>发现如一下问题:" +
+            //       errMsg +
+            //       "</p></div>",
+            //     data ? "导入失败" : this.openFormStateText + "失败",
+            //     {
+            //       confirmButtonText: "确定",
+            //       center: true,
+            //       dangerouslyUseHTMLString: true
+            //     }
+            //   );
+            // }
           }
         })
         .catch(res => {
+            console.log(res)
           this.$message({
             type: "error",
-            message: res.data.msg
+            message: 'error'
           });
-          console.log("res");
+         // console.log("res");
         });
     },
     // init() {

@@ -6,7 +6,7 @@
         <div v-for="(item,index) in listData" :key="index">
           <div class="title">
             <p class="clearfix">
-              <span class="teacher fontsize-lg float-left">{{item.account}}的班课</span>
+              <span class="teacher fontsize-lg float-left">{{item.name}}的班课</span>
               <span class="color-9 fontsize-sm float-right">{{item.list.length}} 个班课</span>
             </p>
           </div>

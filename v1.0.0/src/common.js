@@ -19,7 +19,7 @@ export const userTableHead = [{
 {
     fixed: '',
     prop: 'roledesc',
-    title: '角色',
+    title: '权限',
     width: '',
 },
 {
@@ -313,14 +313,19 @@ export const ansnwerTableHead = [{
     //     width: '',
     // },
 ]
-export const roleType = [{
+export const roleType = [
+    {
+        role:0,
+        label:'禁用'
+    },
+    {
     role: 5,
-    label: '学生'
+    label: '一般权限'
 },
-{
-    role: 10,
-    label: '教师'
-},
+// {
+//     role: 10,   //！ cjy: 账户列表不再出现 教师 / 学生 等信息
+//     label: '教师'
+// },
     {
         role:50,
         label:'校管理员'
@@ -385,11 +390,14 @@ export const filter = (v) => {
                 break;
             case 'schoolrole':{
                 for(let li of v){
-                    for(let j=0; j<roleType.length; j++){
+                    for(let j=0; j<schoolroleType.length; j++){
                         // console.log(v);
-                        if (li[i] == roleType[j].role){
-                            li['roledesc'] = roleType[j].label;
+                        if (li[i] == schoolroleType[j].role){
+                            li['roledesc'] = schoolroleType[j].label;
                             break;
+                        }
+                        else{
+                            li['roledesc'] = li[i]
                         }
                     }
                 }
@@ -405,6 +413,9 @@ export const filter = (v) => {
                         if (li[i] == roleType[j].role){
                             li['roledesc'] = roleType[j].label;
                             break;
+                        }
+                        else{
+                            li['roledesc'] = li[i]
                         }
                     }
                 }

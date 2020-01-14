@@ -137,7 +137,7 @@ export default {
         name: [{ required: true, message: "请输入班课名", trigger: "blur" }]
       },
       ExportDataState: false,
-      ExportFileName: "表格",
+      ExportFileName: "班课列表",
       tHead: bankeTableHead
     };
   },

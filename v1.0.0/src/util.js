@@ -36,6 +36,24 @@ export const filterSearchKey = v=>{
     return oret;
 }
 
+export const showErrMsg = (vthis, msgin)=>{
+    let msg = msgin||''
+    let matchsamedata = msg.match("(Duplicate entry ')(.*?)(' for key)")
+    let msgtip = msg
+    if (matchsamedata){
+        msgtip = '发现重复数据：' + matchsamedata[2]
+    }
+    vthis.$alert(
+        msgtip,
+        '出错提示',
+        {
+            confirmButtonText: "确定",
+            center: true,
+            dangerouslyUseHTMLString: true
+        }
+    );
+}
+
 export const cloneobj =  (obj) =>{
     var o;
     if (typeof obj == "object") {

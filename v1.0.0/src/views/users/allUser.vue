@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { filterKey,cloneobj,filterSearchKey } from "@/util";
+import { filterKey,cloneobj,filterSearchKey,showErrMsg } from "@/util";
 import { userTableHead, roleType } from "@/common";
 import ExportData from "@/views/component/ExportData";
 import UploadExcelComponent from "@/views/component/importExcel";
@@ -184,7 +184,7 @@ export default {
         password: [{ required: true, message: "请输入密码", trigger: "blur" }]
       },
       ExportDataState: true,
-      ExportFileName: "表格",
+      ExportFileName: "账户列表",
       tHead: userTableHead,
      // seachData: {}
     };
@@ -244,7 +244,7 @@ export default {
               json.account = v[i];
             case "昵称":
               json.name = v[i] || "";
-            case "角色":
+            case "权限":
               json.role = this.seleceRole(v[i]);
           }
         }
@@ -261,6 +261,7 @@ export default {
                 return v.role;
             }
         }
+        return roleType[0]
       // switch (v) {
       //   case "学生":
       //     return 5;
@@ -278,6 +279,7 @@ export default {
         if (typeof data.page != 'undefined'){
             data.page = data.page-1;
         }
+
       this.$http
         .post("/api/admin/userquery", data)
         .then(res => {
@@ -288,6 +290,15 @@ export default {
               console.log("userquery", res);
               this.total = res.data.data.count;
               this.allUserData = res.data.data.data;
+
+              //! cjy: 账户统一
+                for(let v of this.allUserData){
+                    if (v.role < 50 && v.role > 0){
+                        v.roleold = v.role;
+                        v.role = 5;  //! 显示为一般用户
+                    }
+                }
+
               filter(this.allUserData);
               this.$message({
                 type: "success",
@@ -324,6 +335,7 @@ export default {
     //  this.init();
 
     },
+
 
       getList() {
 
@@ -435,6 +447,10 @@ export default {
 
         if (oa != 'setpwd'){
             objret.role = temp.role;
+            console.log(temp);
+            if (temp.role < 50 && temp.role>0  && temp.roleold){
+                objret.role = temp.roleold;  //! 赋值原账户 原role信息
+            }
             objret.name = temp.name;
         }
         if (oa != 'add'){
@@ -458,52 +474,63 @@ export default {
       if (data) {
         json.data = data;
       } else {
+
         json.data[0] = this.filterUserUpdate(this.temp);
       }
-      this.$http
-        .post("/api/admin/useradd", json)
-        .then(res => {
-          if (res.data.code == 0) {
-        //    this.getAllUser();
-              this.getList();  //！ 这里只是简单刷新当前页， 不处理搜索等情况
-            this.dialogFormVisible = false;
-            this.$message({
-              type: "success",
-              message: this.openFormStateText + "成功"
-            });
-           // this.init();
-          } else {
-              this.$message({
-                  type: "error",
-                  message: res.data.msg
+      if (!json.data.length){
+          return;
+      }
+      let dopost = ()=>{
+          this.$http
+              .post("/api/admin/useradd", json)
+              .then(res => {
+                  if (res.data.code == 0) {
+                      //    this.getAllUser();
+                      this.getList();  //！ 这里只是简单刷新当前页， 不处理搜索等情况
+                      this.dialogFormVisible = false;
+                      this.$message({
+                          type: "success",
+                          message: this.openFormStateText + "成功"
+                      });
+                      // this.init();
+                  } else {
+                      showErrMsg(this, res.data.msg)
+                      // this.$message({
+                      //     type: "error",
+                      //     message: res.data.msg
+                      // });
+                  }
+              })
+              .catch(res => {
+                  this.$message({
+                      type: "error",
+                      message: res.data.msg
+                  });
+                  console.log("res");
               });
-            // if (res.data.msg.includes("1062")) {
-            //   let errMsg = res.data.msg.split(":")[2].split("entry")[1];
-            //   this.$message({
-            //     type: "error",
-            //     message: data ? "导入失败" : this.openFormStateText + "失败"
-            //   });
-            //   this.$alert(
-            //     "<div><p>请查看是否重复账户</p><p>发现如一下问题:" +
-            //       errMsg +
-            //       "</p></div>",
-            //     data ? "导入失败" : this.openFormStateText + "失败",
-            //     {
-            //       confirmButtonText: "确定",
-            //       center: true,
-            //       dangerouslyUseHTMLString: true
-            //     }
-            //   );
-            // }
+      }
+      let tips = '';
+      if (json.data[0].role == 0){
+          tips = "此操作将禁用账户, 是否继续?"
+      }
+      else{
+          if (json.data[0].role == 100){
+              tips = '此操作将设置为管理员，拥有最高权限，是否继续?'
           }
-        })
-        .catch(res => {
-          this.$message({
-            type: "error",
-            message: res.data.msg
-          });
-          console.log("res");
-        });
+      }
+      if (tips.length > 0){
+          this.$confirm(tips, "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "warning"
+          }).then(()=>{
+              dopost();
+          })
+      }
+      else{
+          dopost();
+      }
+
     },
     // init() {
     //   this.temp = {
