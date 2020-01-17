@@ -50,7 +50,8 @@ export default {
   .item {
     text-align: left;
     .item-col {
-      height: 430px;
+      height: 415px;
+          margin-bottom: 18px;
       .item-warp {
         width: 100%;
         height: 100%;
@@ -58,9 +59,10 @@ export default {
         box-shadow: 0 3px 8px #c7c5c5;
         .item-img {
           width: 100%;
-          height: auto;
+          height: 100%;
           max-width: 100%;
           max-height: 304px;
+          object-fit: cover;
         }
       }
       .caption {

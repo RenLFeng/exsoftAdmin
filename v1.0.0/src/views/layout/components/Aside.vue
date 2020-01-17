@@ -75,7 +75,7 @@ export default {
           });
       }
       items.push({
-          icon: "iconbianzu",
+          icon: "exappfont exappxuexiao-copy",
           index: "school",
           title: "学校管理",
           subs: [
@@ -107,7 +107,7 @@ export default {
               {
                   index: "allBanke",
                   title: "所有班课"
-              }
+              },
           ]
       });
       items.push({

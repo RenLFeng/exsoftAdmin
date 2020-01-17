@@ -5,13 +5,13 @@
     </div>
     <div class="header-right">
       <div class="header-user-con fontsize-md">
-          <div style="margin-right:20px">{{time}}</div>
+        <div style="margin-right:20px">{{time}}</div>
         <!-- 全屏显示 -->
         <!-- <div class="btn-fullscreen" @click="handleFullScreen">
           <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
             <i class="el-icon-rank"></i>
           </el-tooltip>
-        </div> -->
+        </div>-->
         <!-- 消息中心 -->
         <!-- <div class="btn-bell">
           <el-tooltip effect="dark" :content="message?`有${message}条未读消息`:`消息中心`" placement="bottom">
@@ -20,15 +20,11 @@
             </router-link>
           </el-tooltip>
           <span class="btn-bell-badge" v-if="message"></span>
-        </div> -->
+        </div>-->
         <!-- 用户名下拉菜单 -->
         <el-dropdown class="avatar-container fontsize-md" trigger="click">
           <div class="avatar-wrapper">
-            <img
-              :src="loginUser.avatar"
-              class="user-avatar"
-              :onerror="$defaultImg('account')"
-            />
+            <img :src="loginUser.avatar" class="user-avatar" :onerror="$defaultImg('account')" />
             {{loginUser.name}}
             <!-- <i class="el-icon-caret-bottom" /> -->
           </div>
@@ -36,7 +32,7 @@
             <router-link class="inlineBlock" to="/">
               <el-dropdown-item>首页</el-dropdown-item>
             </router-link>
-            <el-dropdown-item>个人设置</el-dropdown-item>
+            <el-dropdown-item @click.native="settings">个人设置</el-dropdown-item>
             <el-dropdown-item divided>
               <span style="display:block;" @click="logout">退出登陆</span>
             </el-dropdown-item>
@@ -44,13 +40,35 @@
         </el-dropdown>
       </div>
     </div>
+    <el-dialog title :visible.sync="setPwdDialog" width="30%" center>
+      <p style>修改密码</p>
+      <el-form
+        ref="dataForm"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left:50px;"
+      >
+        <div>
+          <el-form-item label="原密码:">
+            <el-input type="password" placeholder="请输入原始密码" v-model="ovlPwd"></el-input>
+          </el-form-item>
+          <el-form-item label="新密码:">
+            <el-input type="password" placeholder="请输入新密码" v-model="nvlPwd"></el-input>
+          </el-form-item>
+        </div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cance">取 消</el-button>
+        <el-button type="primary" @click="subSetPwd" :loading="isSubmit">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import cookie from 'js-cookie'
+import cookie from "js-cookie";
 import showAside from "@/components/showAside.vue";
 import { mapState } from "vuex";
-import {nowDate} from '../../../util'
+import { nowDate } from "../../../util";
 export default {
   // name:'header',
   components: {
@@ -58,14 +76,18 @@ export default {
   },
   data() {
     return {
+      setPwdDialog: false,
       fullscreen: false,
       name: "linxin",
       message: 2,
       username: "zyh",
+      isSubmit: false,
+      ovlPwd: "",
+      nvlPwd: ""
     };
   },
   computed: {
-    time(){
+    time() {
       return nowDate();
     },
     isCollapse: {
@@ -77,9 +99,63 @@ export default {
         this.$store.commit("IS_COLLAPSE", newValue);
       }
     },
-      ...mapState(["loginUser"]),
+    ...mapState(["loginUser"])
   },
   methods: {
+    settings() {
+      this.setPwdDialog = true;
+    },
+    subSetPwd() {
+      if (!this.ovlPwd) {
+        this.$message({
+          type: "error",
+          message: "请输入原始密码"
+        });
+        return;
+      }
+      if (!this.nvlPwd) {
+        this.$message({
+          type: "error",
+          message: "请输入新密码"
+        });
+        return;
+      }
+      this.isSubmit = true;
+      this.$http
+        .post(" /api/admin/useradd", {
+          id: this.loginUser.id,
+          password: this.nvlPwd,
+          ovlPwd: this.ovlPwd
+        })
+        .then(res => {
+          if (res.data.code == 0) {
+            this.$message({
+              type: "success",
+              message: "修改成功"
+            });
+            this.cance();
+          } else {
+            this.$message({
+              type: "info",
+              message: "设置失败"
+            });
+          }
+          this.isSubmit = false;
+        })
+        .catch(res => {
+          this.$message({
+            type: "error",
+            message: "服务异常，请稍后再试"
+          });
+          this.isSubmit = false;
+          this.cance();
+        });
+    },
+    cance() {
+      this.nvlPwd='';
+      this.ovlPwd='';
+      this.setPwdDialog = false;
+    },
     toggleClick() {
       this.isCollapse = !this.isCollapse;
     },
