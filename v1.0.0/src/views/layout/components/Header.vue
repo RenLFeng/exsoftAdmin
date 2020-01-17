@@ -29,7 +29,7 @@
               class="user-avatar"
               :onerror="$defaultImg('account')"
             />
-            {{loginUser.account}}
+            {{loginUser.name}}
             <!-- <i class="el-icon-caret-bottom" /> -->
           </div>
           <el-dropdown-menu slot="dropdown" class="user-dropdown">

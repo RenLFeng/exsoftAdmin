@@ -105,7 +105,7 @@ export const bankeTableHead = [{
     },
     {
         fixed: '',
-        prop: 'states',
+        prop: 'statesdesc',
         title: '状态',
         width: '',
     },
@@ -374,10 +374,10 @@ export const filter = (v) => {
                 //! 班课状态
                 for(let li of v){
                     if (li[i] > 0){
-                        li[i] =  '进行中';
+                        li['statesdesc'] =  '进行中';
                     }
                     else{
-                        li[i] =  '已结束';
+                        li['statesdesc'] =  '已结束';
                     }
                 }
                 break;

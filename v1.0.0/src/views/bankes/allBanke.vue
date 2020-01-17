@@ -42,6 +42,7 @@
           <el-button type="primary" @click="handleClickSee(scope.row)" size="small">查看成员</el-button>
           <!-- <el-button type="primary" @click="handleClickUpdateData(scope.row,1)" size="small">编辑</el-button> -->
           <el-button type="primary" @click="seeanalyze(scope.row)" size="small">学情统计</el-button>
+          <el-button type="danger" @click="endbanke(scope.row)" size="small" v-if="scope.row.states>0">结束班课</el-button>
           <el-button type="danger" @click="handleClickDeleteData(scope.row)" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -272,6 +273,43 @@ export default {
           let url =  '/#/ClassStatistics?backendid=' + rowdata.id
           window.open(url);
       },
+      endbanke(row){
+          this.$confirm("结束班课后不可再开始，是否继续?", "提示", {
+              confirmButtonText: "确定",
+              cancelButtonText: "取消",
+              type: "warning"
+          })
+              .then(() => {
+                  this.$http
+                      .post("/api/admin/bankeadd", {data:{
+                          id: row.id ,
+                          states:0
+                      }})
+                      .then(res => {
+                          if (res.data.code == 0) {
+                             this.getList();
+                          } else {
+                              this.$message({
+                                  type: "error",
+                                  message: res.data.msg
+                              });
+                          }
+                      })
+                      .catch(res => {
+                          this.$message({
+                              type: "error",
+                              message: "error"
+                          });
+                      });
+              })
+              .catch(() => {
+                  this.$message({
+                      type: "info",
+                      message: "已取消操作"
+                  });
+              });
+      },
+
     //删除
     handleClickDeleteData(row) {
       console.log(row);
