@@ -122,22 +122,26 @@ export default {
       }
       this.isSubmit = true;
       this.$http
-        .post(" /api/admin/useradd", {
+        .post(" /api/admin/usersetpwd", {
           id: this.loginUser.id,
-          password: this.nvlPwd,
-          ovlPwd: this.ovlPwd
+          newpwd: this.nvlPwd,
+          oldpwd: this.ovlPwd
         })
         .then(res => {
           if (res.data.code == 0) {
             this.$message({
               type: "success",
-              message: "修改成功"
+              message: "修改成功，请重新登陆"
             });
             this.cance();
+              this.$store.commit("SETLOGINUSER", {});
+              this.$store.commit("COMMIT_TOKEN", null);
+              this.$router.push("/login");
           } else {
+              let tipmsgs = '修改失败：'+res.data.msg;
             this.$message({
               type: "info",
-              message: "设置失败"
+              message:tipmsgs
             });
           }
           this.isSubmit = false;

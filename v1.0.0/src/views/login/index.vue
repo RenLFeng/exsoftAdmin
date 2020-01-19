@@ -95,7 +95,7 @@ export default {
               } else {
                 this.$message({
                   type: "info",
-                  message: "登录失败"
+                  message: "登录失败:"+res.data.msg
                 });
               }
             })

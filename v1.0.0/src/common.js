@@ -320,12 +320,12 @@ export const roleType = [
     },
     {
     role: 5,
-    label: '一般权限'
+    label: '一般权限(学员)'
 },
-// {
-//     role: 10,   //！ cjy: 账户列表不再出现 教师 / 学生 等信息
-//     label: '教师'
-// },
+{
+    role: 10,   //！ cjy: 账户列表不再出现 教师 / 学生 等信息
+    label: '一般权限(教师)'
+},
     {
         role:50,
         label:'校管理员'
@@ -347,7 +347,7 @@ export const schoolroleType = [{
 ]
 
 
-export const prefix = process.env.VUE_APP_HOST || "http://192.168.0.2:81";
+export const prefix = ''; // process.env.VUE_APP_HOST || "http://192.168.0.2:81";  //cjy: prefix不能正确下载文件
 export const filter = (v) => {
     if (!v.length) return v;
     let key = Object.keys(v[0]);

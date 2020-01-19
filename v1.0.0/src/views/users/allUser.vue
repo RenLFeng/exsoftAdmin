@@ -295,7 +295,7 @@ export default {
                 for(let v of this.allUserData){
                     if (v.role < 50 && v.role > 0){
                         v.roleold = v.role;
-                        v.role = 5;  //! 显示为一般用户
+                       // v.role = 5;  //! 显示为一般用户
                     }
                 }
 
