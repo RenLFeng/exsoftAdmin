@@ -225,7 +225,7 @@ export default {
           else if (v.type == 'membernum'){
               tourl = '/Analysis';
           }
-          else if (v.type == 'signum' || v.type=='zuoyenum'){
+          else if (v.type == 'signnum' || v.type=='zuoyenum'){
               tourl = '/Actreport';
           }
           if (tourl.length > 0){

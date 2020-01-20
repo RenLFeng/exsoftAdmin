@@ -270,7 +270,8 @@ export default {
       this.$emit("bankeUser", data);
     },
       seeanalyze(rowdata){
-          let url =  '/#/ClassStatistics?backendid=' + rowdata.id
+        //! 使用相对路径
+          let url =  '#/ClassStatistics?backendid=' + rowdata.id
           window.open(url);
       },
       endbanke(row){

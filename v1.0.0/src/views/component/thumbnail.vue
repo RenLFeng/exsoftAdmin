@@ -37,7 +37,7 @@ export default {
     //  this.$router.push({ name: "ClassStatistics", params: { classInfo: v } });
       //  this.$router.push({ path: "/ClassStatistics", query: { classInfo: v} });
       //this.$store.commit("SET_CLASS_ID", v.id);
-       let url =  '/#/ClassStatistics?backendid=' + v.id;
+       let url =  '#/ClassStatistics?backendid=' + v.id;
        window.open(url);
     }
   }
