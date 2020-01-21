@@ -594,6 +594,10 @@ export default {
         if (this.openForm != 'bind'){
             o.name = item.name;
             o.avatar = item.avatar;
+
+            o.maxbankenum = item.maxbankenum;
+            o.maxbankemnum = item.maxbankemnum;
+            o.maxbankeperuser = item.maxbankeperuser;
         }
         if (this.openForm == 'add' || this.openForm == 'bind'){
             o.useraccount = item.useraccount;
