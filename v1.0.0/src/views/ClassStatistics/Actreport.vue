@@ -349,28 +349,28 @@ export default {
                 case 1:
                   for (let v in echartBarData.xAxis.data) {
                     if (echartBarData.xAxis.data[v] == "资源学习") {
-                      echartBarData.series[0].data[v] = item.joinwpercent / 100;
+                      echartBarData.series[0].data[v] = (item.joinwpercent / 100).toFixed(2);
                     }
                   }
                   break;
                 case 2:
                   for (let v in echartBarData.xAxis.data) {
                     if (echartBarData.xAxis.data[v] == "签到") {
-                      echartBarData.series[0].data[v] = item.joinwpercent / 100;
+                      echartBarData.series[0].data[v] = (item.joinwpercent / 100).toFixed(2);
                     }
                   }
                   break;
                 case 3:
                   for (let v in echartBarData.xAxis.data) {
                     if (echartBarData.xAxis.data[v] == "作业") {
-                      echartBarData.series[0].data[v] = item.joinwpercent / 100;
+                      echartBarData.series[0].data[v] = (item.joinwpercent / 100).toFixed(2);
                     }
                   }
                   break;
                 case 4:
                   for (let v in echartBarData.xAxis.data) {
                     if (echartBarData.xAxis.data[v] == "评测") {
-                      echartBarData.series[0].data[v] = item.joinwpercent / 100;
+                      echartBarData.series[0].data[v] = (item.joinwpercent / 100).toFixed(2);
                     }
                   }
                   break;
@@ -431,7 +431,7 @@ export default {
               this.tableData.push({
                 name: v.username,
                 ParticipationTimes: v.num,
-                Average: v.avgscore
+                Average:parseInt(v.avgscore)
               });
             }
             //签到报表
@@ -484,7 +484,7 @@ export default {
               this.SigntableData.push({
                 name: v.username,
                   signnum:v.signnum,
-                sign: v.signnum * 100 / signtotal + '%'
+                sign: (v.signnum * 100 / signtotal).toFixed(2) + '%'
               });
             }
             // console.log("this.echartLineSignData", this.echartLineSignData);

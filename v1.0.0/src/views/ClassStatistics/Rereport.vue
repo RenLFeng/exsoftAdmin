@@ -55,7 +55,13 @@ import Bar from "../component/echart/bar";
 import Eline from "../component/echart/line";
 import { mapState } from "vuex";
 import "./style/common.scss";
-import { getDate, nowDate,parseChartScoreData, getFileType } from "../../util";
+import {
+  getDate,
+  nowDate,
+  parseChartScoreData,
+  getFileType,
+  sortFn
+} from "@/util";
 const times = [];
 for (let i = 0; i < 24; i++) {
   times.push(`${i}点-${i + 1}点`);
@@ -220,7 +226,7 @@ export default {
                 case 100:
                   for (let item of echartData.series.data) {
                     if (item.name == "网页链接") {
-                       item.value++;
+                      item.value++;
                     }
                   }
                   break;
@@ -232,7 +238,7 @@ export default {
             //资源清单
             for (let key in this.Bankefile) {
               this.DetailedTabel.push({
-                id: key,
+                id: parseInt(key) + 1,
                 name: this.Bankefile[key].name,
                 type: getFileType(this.Bankefile[key].finttype),
                 seeNumber: this.Bankefile[key].viewnum
@@ -287,6 +293,7 @@ export default {
             }
             this.echartData2 = echartData2;
             // 资源学习Top5
+            this.Resourcelearning.members.sort(sortFn("score1", 1));
             for (let v of this.Resourcelearning.members) {
               this.tableData.push({
                 name: v.name,
@@ -296,7 +303,7 @@ export default {
               });
             }
             console.log("this.echartData2", this.echartData2);
-            console.log("this.Resourcelearning", this.Resourcelearning);
+            console.log("资源学习Top5", this.Resourcelearning);
           }
         })
         .catch(res => {
@@ -314,27 +321,26 @@ export default {
         .then(res => {
           // console.log("success", res);
           if (res.data.code == "0") {
-              if (res.data.data ){
-                  this.querytimecount = res.data.data;
-              }
+            if (res.data.data) {
+              this.querytimecount = res.data.data;
+            }
             // for (let key in this.querytimecount) {
             //   let index = key.split("time")[1];
             //   echartLineData.series[0].data[index] = this.querytimecount[key];
             // }
-              let ed = [];
-              let qt = this.querytimecount;
-           //   console.log(qt);
-              for(let i=0; i<24; i++){
-                  //ed.push(1);
-                  let szkey = 'time' + i;
-                  if (typeof qt[szkey] != 'undefined'){
-                      ed.push(Number(qt[szkey]));
-                  }
-                  else{
-                      ed.push(0);
-                  }
+            let ed = [];
+            let qt = this.querytimecount;
+            //   console.log(qt);
+            for (let i = 0; i < 24; i++) {
+              //ed.push(1);
+              let szkey = "time" + i;
+              if (typeof qt[szkey] != "undefined") {
+                ed.push(Number(qt[szkey]));
+              } else {
+                ed.push(0);
               }
-              echartLineData.series[0].data = ed;
+            }
+            echartLineData.series[0].data = ed;
             this.echartLineData = echartLineData;
 
             // console.log("this.echartLineData", this.echartLineData);

@@ -67,7 +67,7 @@ export default {
         series: [
           {
             type: "pie",
-            radius: "65%",
+            radius: "50%",
             center: ["50%", "50%"],
             selectedMode: "single",
             data: this.data.series.data,

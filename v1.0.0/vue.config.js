@@ -36,8 +36,8 @@ module.exports = {
     //     changeOrigin: true
     //   }
     // }
-   proxy: 'http://192.168.0.2:9982'
-     // proxy:'https://www2.exsoft.com.cn'
+  //  proxy: 'http://192.168.0.2:9982'
+     proxy:'https://www2.exsoft.com.cn'
       //  proxy: 'http://localhost:9982'
   },
   //定义scss全局变量

@@ -416,7 +416,7 @@ export default {
               });
             }
             console.log("this.echartRadar", this.echartRadar);
-            console.log("this.Resourcelearning", this.Resourcelearning);
+            console.log("得分清单", this.Resourcelearning.members);
           }
         })
         .catch(res => {
