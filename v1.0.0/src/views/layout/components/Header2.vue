@@ -78,7 +78,15 @@ export default {
   },
   methods: {
     back(){
-      this.$router.go(-1);
+        this.$router.go(-1);
+        return;
+      if(this.$route.path=='/ClassStatistics'){
+
+      }else{
+         this.$router.push({
+        name: "ClassStatistics",
+      });
+      }
     }
   }
 };
